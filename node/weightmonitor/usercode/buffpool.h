@@ -7,21 +7,22 @@
 #include "cmsis_os.h"
 #include <stdint.h>
 
-typedef 
-struct
+typedef struct 
 {
+	uint8_t* p;
 	osMutexId mutex;
-	uint8_t* p_buff_block;
 	int buff_size;
-} 
-buff_block_t;
+} buffblock_t;
 
-typedef buff_block_t* p_buff_block_t;
+typedef buffblock_t* p_buffblock_t;
+
+
 
 
 int32_t init_buffpool(void);
-p_buff_block_t claim_buff(int size);
-int32_t free_buff(p_buff_block_t p);
+int get_buff_size(p_buffblock_t p);
+p_buffblock_t claim_buff(int size);
+int32_t free_buff(p_buffblock_t p);
 
 
 #endif
