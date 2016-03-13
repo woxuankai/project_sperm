@@ -1,0 +1,6 @@
+--cpu Cortex-M3 -g --apcs=interwork --pd "__MICROLIB SETA 1" -I ..\Inc
+-I E:\project_sperm\node\weightmonitor\MDK-ARM\RTE
+-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include
+-I C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.0.0\Device\Include
+--pd "__UVISION_VERSION SETA 518" --pd "_RTE_ SETA 1" --pd "STM32F10X_MD SETA 1"
+--list startup_stm32f103xb.lst --xref -o weightmonitor\startup_stm32f103xb.o --depend weightmonitor\startup_stm32f103xb.d "startup_stm32f103xb.s"
