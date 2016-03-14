@@ -37,7 +37,7 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
-#include "buffpool.h"
+#include "uart_driver.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -48,12 +48,12 @@ osThreadId recv_wifiHandle;
 osThreadId handle_dataHandle;
 osThreadId handle_ctrlHandle;
 osThreadId handle_wifiHandle;
-osMessageQId q_r_dataHandle;
-osMessageQId q_r_ctrlHandle;
-osMessageQId q_r_wifiHandle;
-osMessageQId q_t_dataHandle;
-osMessageQId q_t_ctrlHandle;
-osMessageQId q_t_wifiHandle;
+osMessageQId uartdata_r_queueHandle;
+osMessageQId uartdata_t_queueHandle;
+osMessageQId uartwifi_r_queueHandle;
+osMessageQId uartwifi_t_queueHandle;
+osMessageQId uartctrl_r_queueHandle;
+osMessageQId uartctrl_t_queueHandle;
 osTimerId led0Handle;
 
 /* USER CODE BEGIN Variables */
@@ -136,29 +136,29 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_THREADS */
 
   /* Create the queue(s) */
-  /* definition and creation of q_r_data */
-  osMessageQDef(q_r_data, 4, p_buffblock_t);
-  q_r_dataHandle = osMessageCreate(osMessageQ(q_r_data), NULL);
+  /* definition and creation of uartdata_r_queue */
+  osMessageQDef(uartdata_r_queue, 4, uartdata_package_r_t);
+  uartdata_r_queueHandle = osMessageCreate(osMessageQ(uartdata_r_queue), NULL);
 
-  /* definition and creation of q_r_ctrl */
-  osMessageQDef(q_r_ctrl, 4, p_buffblock_t);
-  q_r_ctrlHandle = osMessageCreate(osMessageQ(q_r_ctrl), NULL);
+  /* definition and creation of uartdata_t_queue */
+  osMessageQDef(uartdata_t_queue, 4, uartdata_package_t_t);
+  uartdata_t_queueHandle = osMessageCreate(osMessageQ(uartdata_t_queue), NULL);
 
-  /* definition and creation of q_r_wifi */
-  osMessageQDef(q_r_wifi, 4, p_buffblock_t);
-  q_r_wifiHandle = osMessageCreate(osMessageQ(q_r_wifi), NULL);
+  /* definition and creation of uartwifi_r_queue */
+  osMessageQDef(uartwifi_r_queue, 4, uartwifi_package_r_t);
+  uartwifi_r_queueHandle = osMessageCreate(osMessageQ(uartwifi_r_queue), NULL);
 
-  /* definition and creation of q_t_data */
-  osMessageQDef(q_t_data, 4, p_buffblock_t);
-  q_t_dataHandle = osMessageCreate(osMessageQ(q_t_data), NULL);
+  /* definition and creation of uartwifi_t_queue */
+  osMessageQDef(uartwifi_t_queue, 4, uartwifi_package_t_t);
+  uartwifi_t_queueHandle = osMessageCreate(osMessageQ(uartwifi_t_queue), NULL);
 
-  /* definition and creation of q_t_ctrl */
-  osMessageQDef(q_t_ctrl, 4, p_buffblock_t);
-  q_t_ctrlHandle = osMessageCreate(osMessageQ(q_t_ctrl), NULL);
+  /* definition and creation of uartctrl_r_queue */
+  osMessageQDef(uartctrl_r_queue, 4, uartctrl_package_r_t);
+  uartctrl_r_queueHandle = osMessageCreate(osMessageQ(uartctrl_r_queue), NULL);
 
-  /* definition and creation of q_t_wifi */
-  osMessageQDef(q_t_wifi, 4, p_buffblock_t);
-  q_t_wifiHandle = osMessageCreate(osMessageQ(q_t_wifi), NULL);
+  /* definition and creation of uartctrl_t_queue */
+  osMessageQDef(uartctrl_t_queue, 4, uartctrl_package_t_t);
+  uartctrl_t_queueHandle = osMessageCreate(osMessageQ(uartctrl_t_queue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

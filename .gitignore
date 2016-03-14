@@ -62,6 +62,7 @@ JLinkLog.txt
 *.htm
 *.sct
 *.map
+*._ia
 
 ##for Python
 
