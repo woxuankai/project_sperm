@@ -91,6 +91,13 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
   UNUSED(huart);
 }
+
+
+
+
+
+
+
 //void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart)
 //{
 //  UNUSED(huart);
