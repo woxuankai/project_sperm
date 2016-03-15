@@ -137,27 +137,27 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the queue(s) */
   /* definition and creation of uartdata_r_queue */
-  osMessageQDef(uartdata_r_queue, 4, uint32_t);
+  osMessageQDef(uartdata_r_queue, 4, uart_memblk_pt);
   uartdata_r_queueHandle = osMessageCreate(osMessageQ(uartdata_r_queue), NULL);
 
   /* definition and creation of uartdata_t_queue */
-  osMessageQDef(uartdata_t_queue, 4, uint32_t );
+  osMessageQDef(uartdata_t_queue, 4, uart_memblk_pt);
   uartdata_t_queueHandle = osMessageCreate(osMessageQ(uartdata_t_queue), NULL);
 
   /* definition and creation of uartwifi_r_queue */
-  osMessageQDef(uartwifi_r_queue, 4, uint32_t );
+  osMessageQDef(uartwifi_r_queue, 4, uart_memblk_pt );
   uartwifi_r_queueHandle = osMessageCreate(osMessageQ(uartwifi_r_queue), NULL);
 
   /* definition and creation of uartwifi_t_queue */
-  osMessageQDef(uartwifi_t_queue, 4, uint32_t );
+  osMessageQDef(uartwifi_t_queue, 4, uart_memblk_pt);
   uartwifi_t_queueHandle = osMessageCreate(osMessageQ(uartwifi_t_queue), NULL);
 
   /* definition and creation of uartctrl_r_queue */
-  osMessageQDef(uartctrl_r_queue, 4, uint32_t );
+  osMessageQDef(uartctrl_r_queue, 4, uart_memblk_pt);
   uartctrl_r_queueHandle = osMessageCreate(osMessageQ(uartctrl_r_queue), NULL);
 
   /* definition and creation of uartctrl_t_queue */
-  osMessageQDef(uartctrl_t_queue, 4, uint32_t );
+  osMessageQDef(uartctrl_t_queue, 4, uart_memblk_pt );
   uartctrl_t_queueHandle = osMessageCreate(osMessageQ(uartctrl_t_queue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */

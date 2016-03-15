@@ -33,4 +33,4 @@
 typedef memblk_t uart_memblk_t;
 typedef uart_memblk_t* uart_memblk_pt;
 
-#endif 
+#endif
