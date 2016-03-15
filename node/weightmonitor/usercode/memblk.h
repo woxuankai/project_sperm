@@ -2,11 +2,10 @@
 #define MEMBKL_H
 
 #include "cmsis_os.h"
-typedef struct
-{
-	osMutexId mutex;
-	uint8_t blk[64];
-	int buff_size;
-} memblk_t;
+#define MEM_BLOCK_SIZE 64
+#define MEM_BLOCK_MUN 32
+
+typedef char[MEM_BLOCK_SIZE] memblk_t; 
+
 
 #endif
