@@ -25,25 +25,51 @@ int uart_transmit(char *uartname, uart_memblk_pt pack, uint32_t time);
  
 void func_recv_data(void const * argument)
 {
+	uint32_t PreviousWakeTime;
+	PreviousWakeTime = osKernelSysTick();
   for(;;)
-  {
-    osDelay(1);
+  {		
+    osDelayUntil(&PreviousWakeTime, UART_QUIERY_INTERVAL);
   }
+
+	if(osThreadTerminate(NULL) != osOK)
+	{
+		//something went wrong
+	}
+	return ;
 }
 void func_recv_ctrl(void const * argument)
 {
+	uint32_t PreviousWakeTime;
+	PreviousWakeTime = osKernelSysTick();
   for(;;)
-  {
-    osDelay(1);
+  {		
+    osDelayUntil(&PreviousWakeTime, UART_QUIERY_INTERVAL);
   }
+	
+	if(osThreadTerminate(NULL) != osOK)
+	{
+		//something went wrong
+	}
+	return ;
 }
 void func_recv_wifi(void const * argument)
 {
-	for(;;)
-  {
-    osDelay(1);
+	uint32_t PreviousWakeTime;
+	PreviousWakeTime = osKernelSysTick();
+  for(;;)
+  {	
+		
+    osDelayUntil(&PreviousWakeTime, UART_QUIERY_INTERVAL);
   }
+	if(osThreadTerminate(NULL) != osOK)
+	{
+		//something went wrong
+	}
+	return ;
 }
+
+
 void func_handle_data(void const * argument)
 {
   for(;;)
