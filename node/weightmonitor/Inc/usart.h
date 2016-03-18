@@ -50,9 +50,9 @@ extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN Private defines */
-#define huart_wifi huart3
-#define huart_ctrl huart1
-#define huart_data huart2
+#define huartwifi huart3
+#define huartctrl huart1
+#define huartdata huart2
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);

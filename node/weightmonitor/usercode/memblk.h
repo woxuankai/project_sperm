@@ -8,4 +8,10 @@
 typedef char memblk_t[MEM_BLOCK_SIZE]; 
 
 
+int memblk_init(void);
+void *memblk_take(void);
+int memblk_free(void* p);
+//see how many blocks left
+//int memblk_peek(void);
+
 #endif

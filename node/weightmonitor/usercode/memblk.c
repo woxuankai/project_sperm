@@ -14,3 +14,14 @@ int memblk_init(void)
 	  return -1;
 	return 0;
 }
+
+
+
+void* memblk_take(void)
+{
+	return NULL;
+}
+int memblk_free(void* p)
+{
+	return 0;
+}

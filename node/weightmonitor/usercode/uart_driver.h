@@ -26,6 +26,10 @@
 #define UARTDATA_BUFF UART2_BUFF
 #define UARTWIFI_BUFF UART3_BUFF
 
+//#define huartctrl huart1
+//#define huartdata huart2
+//#define huartwifi huart3
+
 #define UART_MEM_BLOCK_SIZE MEM_BLOCK_SIZE
 #define uart_mempool mempool
 //typedef

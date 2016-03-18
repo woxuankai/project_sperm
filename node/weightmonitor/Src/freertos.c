@@ -48,13 +48,19 @@ osThreadId recv_wifiHandle;
 osThreadId handle_dataHandle;
 osThreadId handle_ctrlHandle;
 osThreadId handle_wifiHandle;
-osMessageQId uartdata_r_queueHandle;
-osMessageQId uartdata_t_queueHandle;
-osMessageQId uartwifi_r_queueHandle;
-osMessageQId uartwifi_t_queueHandle;
-osMessageQId uartctrl_r_queueHandle;
-osMessageQId uartctrl_t_queueHandle;
+osThreadId send_dataHandle;
+osThreadId send_ctrlHandle;
+osThreadId send_wifiHandle;
+osMessageQId data_r_queueHandle;
+osMessageQId data_t_queueHandle;
+osMessageQId wifi_r_queueHandle;
+osMessageQId wifi_t_queueHandle;
+osMessageQId ctrl_r_queueHandle;
+osMessageQId ctrl_t_queueHandle;
 osTimerId led0Handle;
+osSemaphoreId data_t_cpltHandle;
+osSemaphoreId wifi_t_cpltHandle;
+osSemaphoreId ctrl_t_cpltHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -68,6 +74,9 @@ extern void func_recv_wifi(void const * argument);
 extern void func_handle_data(void const * argument);
 extern void func_handle_ctrl(void const * argument);
 extern void func_handle_wifi(void const * argument);
+extern void func_send_data(void const * argument);
+extern void func_send_ctrl(void const * argument);
+extern void func_send_wifi(void const * argument);
 extern void Callback_led0(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -88,6 +97,19 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* definition and creation of data_t_cplt */
+  osSemaphoreDef(data_t_cplt);
+  data_t_cpltHandle = osSemaphoreCreate(osSemaphore(data_t_cplt), 1);
+
+  /* definition and creation of wifi_t_cplt */
+  osSemaphoreDef(wifi_t_cplt);
+  wifi_t_cpltHandle = osSemaphoreCreate(osSemaphore(wifi_t_cplt), 1);
+
+  /* definition and creation of ctrl_t_cplt */
+  osSemaphoreDef(ctrl_t_cplt);
+  ctrl_t_cpltHandle = osSemaphoreCreate(osSemaphore(ctrl_t_cplt), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -120,7 +142,7 @@ void MX_FREERTOS_Init(void) {
   recv_wifiHandle = osThreadCreate(osThread(recv_wifi), NULL);
 
   /* definition and creation of handle_data */
-  osThreadDef(handle_data, func_handle_data, osPriorityHigh, 0, 128);
+  osThreadDef(handle_data, func_handle_data, osPriorityAboveNormal, 0, 128);
   handle_dataHandle = osThreadCreate(osThread(handle_data), NULL);
 
   /* definition and creation of handle_ctrl */
@@ -131,34 +153,46 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(handle_wifi, func_handle_wifi, osPriorityAboveNormal, 0, 128);
   handle_wifiHandle = osThreadCreate(osThread(handle_wifi), NULL);
 
+  /* definition and creation of send_data */
+  osThreadDef(send_data, func_send_data, osPriorityHigh, 0, 128);
+  send_dataHandle = osThreadCreate(osThread(send_data), NULL);
+
+  /* definition and creation of send_ctrl */
+  osThreadDef(send_ctrl, func_send_ctrl, osPriorityHigh, 0, 128);
+  send_ctrlHandle = osThreadCreate(osThread(send_ctrl), NULL);
+
+  /* definition and creation of send_wifi */
+  osThreadDef(send_wifi, func_send_wifi, osPriorityHigh, 0, 128);
+  send_wifiHandle = osThreadCreate(osThread(send_wifi), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Create the queue(s) */
-  /* definition and creation of uartdata_r_queue */
-  osMessageQDef(uartdata_r_queue, 4, uart_memblk_pt);
-  uartdata_r_queueHandle = osMessageCreate(osMessageQ(uartdata_r_queue), NULL);
+  /* definition and creation of data_r_queue */
+  osMessageQDef(data_r_queue, 4, uart_memblk_pt);
+  data_r_queueHandle = osMessageCreate(osMessageQ(data_r_queue), NULL);
 
-  /* definition and creation of uartdata_t_queue */
-  osMessageQDef(uartdata_t_queue, 4, uart_memblk_pt);
-  uartdata_t_queueHandle = osMessageCreate(osMessageQ(uartdata_t_queue), NULL);
+  /* definition and creation of data_t_queue */
+  osMessageQDef(data_t_queue, 4, uart_memblk_pt);
+  data_t_queueHandle = osMessageCreate(osMessageQ(data_t_queue), NULL);
 
-  /* definition and creation of uartwifi_r_queue */
-  osMessageQDef(uartwifi_r_queue, 4, uart_memblk_pt );
-  uartwifi_r_queueHandle = osMessageCreate(osMessageQ(uartwifi_r_queue), NULL);
+  /* definition and creation of wifi_r_queue */
+  osMessageQDef(wifi_r_queue, 4, uart_memblk_pt );
+  wifi_r_queueHandle = osMessageCreate(osMessageQ(wifi_r_queue), NULL);
 
-  /* definition and creation of uartwifi_t_queue */
-  osMessageQDef(uartwifi_t_queue, 4, uart_memblk_pt);
-  uartwifi_t_queueHandle = osMessageCreate(osMessageQ(uartwifi_t_queue), NULL);
+  /* definition and creation of wifi_t_queue */
+  osMessageQDef(wifi_t_queue, 4, uart_memblk_pt);
+  wifi_t_queueHandle = osMessageCreate(osMessageQ(wifi_t_queue), NULL);
 
-  /* definition and creation of uartctrl_r_queue */
-  osMessageQDef(uartctrl_r_queue, 4, uart_memblk_pt);
-  uartctrl_r_queueHandle = osMessageCreate(osMessageQ(uartctrl_r_queue), NULL);
+  /* definition and creation of ctrl_r_queue */
+  osMessageQDef(ctrl_r_queue, 4, uart_memblk_pt);
+  ctrl_r_queueHandle = osMessageCreate(osMessageQ(ctrl_r_queue), NULL);
 
-  /* definition and creation of uartctrl_t_queue */
-  osMessageQDef(uartctrl_t_queue, 4, uart_memblk_pt );
-  uartctrl_t_queueHandle = osMessageCreate(osMessageQ(uartctrl_t_queue), NULL);
+  /* definition and creation of ctrl_t_queue */
+  osMessageQDef(ctrl_t_queue, 4, uart_memblk_pt );
+  ctrl_t_queueHandle = osMessageCreate(osMessageQ(ctrl_t_queue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
