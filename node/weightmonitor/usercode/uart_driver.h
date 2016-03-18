@@ -26,9 +26,15 @@
 #define UARTDATA_BUFF UART2_BUFF
 #define UARTWIFI_BUFF UART3_BUFF
 
-//#define huartctrl huart1
-//#define huartdata huart2
-//#define huartwifi huart3
+extern osMessageQId data_r_queueHandle;
+extern osMessageQId data_t_queueHandle;
+extern osMessageQId wifi_r_queueHandle;
+extern osMessageQId wifi_t_queueHandle;
+extern osMessageQId ctrl_r_queueHandle;
+extern osMessageQId ctrl_t_queueHandle;
+extern osSemaphoreId data_t_cpltHandle;
+extern osSemaphoreId wifi_t_cpltHandle;
+extern osSemaphoreId ctrl_t_cpltHandle;
 
 #define UART_MEM_BLOCK_SIZE MEM_BLOCK_SIZE
 #define uart_mempool mempool
@@ -36,5 +42,11 @@
 ////////////////////////////////////////////////////////////////////////////
 typedef memblk_t uart_memblk_t;
 typedef uart_memblk_t* uart_memblk_pt;
+
+
+//func
+//transmit a message
+#define uart_transmit(TYPE, p, timeout) \
+	osMessagePut(TYPE##_t_queueHandle,(uint32_t)p,timeout);
 
 #endif

@@ -22,22 +22,13 @@ char UART2_BUFF[UART2_BUFF_SIZE] = {0};
 char UART3_BUFF[UART3_BUFF_SIZE] = {0};
 
 
-extern osMessageQId data_r_queueHandle;
-extern osMessageQId data_t_queueHandle;
-extern osMessageQId wifi_r_queueHandle;
-extern osMessageQId wifi_t_queueHandle;
-extern osMessageQId ctrl_r_queueHandle;
-extern osMessageQId ctrl_t_queueHandle;
-extern osSemaphoreId data_t_cpltHandle;
-extern osSemaphoreId wifi_t_cpltHandle;
-extern osSemaphoreId ctrl_t_cpltHandle;
+
 
 
 //receive a message
 uart_memblk_pt uart_receive(char *uartname, uint32_t time);
 
-//transmit a message
-int uart_transmit(char *uartname, uart_memblk_pt pack, uint32_t time);
+
 
 
 void func_recv_data(void const * argument)
@@ -106,13 +97,13 @@ waitfor_package:\
 		evt = osMessageGet(TYPE##_t_queueHandle, osWaitForever);\
 		if (evt.status != osEventMessage)\
 		{\
-			console_runtimereport(CONSOLE_WARN ING, "unknown msg");\
+			console_runtimereport(CONSOLE_WARNING, "device: "#TYPE": unknown msg");\
 			continue;\
 		}\
 		rptr = (uart_memblk_pt)evt.value.v;\
 		if(rptr == NULL)\
 		{\
-			console_runtimereport(CONSOLE_WARNING, "NULL memblk ptr");\
+			console_runtimereport(CONSOLE_WARNING, "device: "#TYPE": NULL memblk ptr");\
 			continue;\
 		}\
 \
@@ -128,7 +119,7 @@ send_package:\
 		len = strlen((char*)rptr);\
 		if(len <= 0)\
 		{\
-			console_runtimereport(CONSOLE_WARNING,"empty string");\
+			console_runtimereport(CONSOLE_WARNING,"device: "#TYPE": empty string");\
 			goto free_memblk;\
 		}\
 		osSemaphoreWait(TYPE##_t_cpltHandle, 0);\
@@ -136,14 +127,14 @@ send_package:\
 		halstatus =	HAL_UART_Transmit_DMA(&huart##TYPE,(uint8_t *)rptr,len);\
 		if(halstatus != HAL_OK)\
 		{\
-			console_runtimereport(CONSOLE_WARNING,"failed to start dma");\
+			console_runtimereport(CONSOLE_WARNING,"device: "#TYPE": failed to start dma");\
 			goto free_memblk;\
 		}\
 		/*wait for dma transmit cplt*/\
 		osstatus = osSemaphoreWait(TYPE##_t_cpltHandle,SEND_TIME_OUT);\
 		if(osstatus != osOK)\
 		{\
-			console_runtimereport(CONSOLE_ERROR,"tx dma time out");\
+			console_runtimereport(CONSOLE_ERROR,"device: "#TYPE": tx dma time out");\
 			goto free_memblk;\
 		}\
 \
@@ -153,7 +144,7 @@ free_memblk:\
 		status = memblk_free((void*)rptr);\
 		if(status < 0)\
 		{\
-			console_runtimereport(CONSOLE_ERROR,"failed to free memblk");\
+			console_runtimereport(CONSOLE_ERROR,"device: "#TYPE": failed to free memblk");\
 			goto waitfor_package;\
 		}\
 		goto waitfor_package;\
@@ -170,21 +161,25 @@ FUNC_SEND_COMMON_GENERATOR(ctrl)
 
 void func_handle_data(void const * argument)
 {
-    char * p;
+    //char * p;
     for(;;)
     {
-        p = memblk_take();
-        if(p == NULL)
-            continue;
-        snprintf(p, MEM_BLOCK_SIZE,"hello!\r\n");
-        osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
-        osDelay(1000);
+        //p = memblk_take();
+        //if(p == NULL)
+        //    continue;
+        //snprintf(p, MEM_BLOCK_SIZE,"hello!\r\n");
+		//uart_transmit(ctrl,p,100);
+        //osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
+        //osDelay(1000);
         
-        p = memblk_take();
-        if(p == NULL)
-            continue;
-        snprintf(p, MEM_BLOCK_SIZE,"this is uartctrl!\r\n");
-        osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
+        //p = memblk_take();
+        //if(p == NULL)
+        //    continue;
+        //snprintf(p, MEM_BLOCK_SIZE,"this is uartctrl!\r\n");
+        //uart_transmit(ctrl,p,100);
+		//osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
+        //osDelay(1000);
+        console_runtimereport(CONSOLE_WARNING,"fuck! ""unknown huart");//error report
         osDelay(1000);
     }
 }
@@ -199,7 +194,8 @@ void func_handle_wifi(void const * argument)
 {
   for(;;)
   {
-    osDelay(1);
+    osDelay(10000);
+    console_runtimereport(CONSOLE_ERROR,"you die!");//error report
   }
 }
 
@@ -212,7 +208,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 	else if(huart == &huartwifi)
 		osSemaphoreRelease(wifi_t_cpltHandle);
 	else
-		console_runtimereport(CONSOLE_WARNING,"unknown huart");//error report
+		console_runtimereport(CONSOLE_WARNING,"unknown huart cplt");//error report
 }
 
 
@@ -236,7 +232,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 //		evt = osMessageGet(ctrl_t_queueHandle, osWaitForever);\
 //		if (evt.status != osEventMessage)\
 //		{\
-//			console_runtimereport(CONSOLE_WARN ING, "unknown msg");\
+//			console_runtimereport(CONSOLE_WARNING, "unknown msg");\
 //			continue;\
 //		}\
 //		rptr = (uart_memblk_pt)evt.value.v;\
