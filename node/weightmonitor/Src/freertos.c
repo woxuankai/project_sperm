@@ -126,19 +126,19 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 64);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of recv_data */
-  osThreadDef(recv_data, func_recv_data, osPriorityRealtime, 0, 128);
+  osThreadDef(recv_data, func_recv_data, osPriorityRealtime, 0, 64);
   recv_dataHandle = osThreadCreate(osThread(recv_data), NULL);
 
   /* definition and creation of recv_ctrl */
-  osThreadDef(recv_ctrl, func_recv_ctrl, osPriorityRealtime, 0, 128);
+  osThreadDef(recv_ctrl, func_recv_ctrl, osPriorityRealtime, 0, 64);
   recv_ctrlHandle = osThreadCreate(osThread(recv_ctrl), NULL);
 
   /* definition and creation of recv_wifi */
-  osThreadDef(recv_wifi, func_recv_wifi, osPriorityRealtime, 0, 128);
+  osThreadDef(recv_wifi, func_recv_wifi, osPriorityRealtime, 0, 64);
   recv_wifiHandle = osThreadCreate(osThread(recv_wifi), NULL);
 
   /* definition and creation of handle_data */
@@ -154,15 +154,15 @@ void MX_FREERTOS_Init(void) {
   handle_wifiHandle = osThreadCreate(osThread(handle_wifi), NULL);
 
   /* definition and creation of send_data */
-  osThreadDef(send_data, func_send_data, osPriorityHigh, 0, 128);
+  osThreadDef(send_data, func_send_data, osPriorityHigh, 0, 64);
   send_dataHandle = osThreadCreate(osThread(send_data), NULL);
 
   /* definition and creation of send_ctrl */
-  osThreadDef(send_ctrl, func_send_ctrl, osPriorityHigh, 0, 128);
+  osThreadDef(send_ctrl, func_send_ctrl, osPriorityHigh, 0, 64);
   send_ctrlHandle = osThreadCreate(osThread(send_ctrl), NULL);
 
   /* definition and creation of send_wifi */
-  osThreadDef(send_wifi, func_send_wifi, osPriorityHigh, 0, 128);
+  osThreadDef(send_wifi, func_send_wifi, osPriorityHigh, 0, 64);
   send_wifiHandle = osThreadCreate(osThread(send_wifi), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

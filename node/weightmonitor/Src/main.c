@@ -38,7 +38,9 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
 #include "ledctrl.h"
+#include "memblk.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -85,7 +87,9 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-
+    if(memblk_init() != 0)
+        while(true)
+            ;
 	
   /* USER CODE END 2 */
 
