@@ -24,7 +24,8 @@ char UART3_BUFF[UART3_BUFF_SIZE] = {0};
 //receive a message
 uart_memblk_pt uart_receive(char *uartname, uint32_t time);
 
-
+////warning!!!!!!!!!!!!!!!input of uart should not be '\0'//////
+///or there may be err///
 #define FUNC_RECV_COMMON_GENERATOR(TYPE)\
 void func_recv_##TYPE(void const * argument)\
 {\
@@ -65,11 +66,13 @@ void func_recv_##TYPE(void const * argument)\
     const osMessageQId queue = TYPE##_r_queueHandle;\
     \
     /*start dma in circulate mode*/\
-    halstatus = HAL_UART_Receive_DMA(huart_p, (uint8_t*)UART##TYPE##_BUFF, buff_size);\
+    halstatus = HAL_UART_Receive_DMA(huart_p, \
+            (uint8_t*)UART##TYPE##_BUFF, buff_size);\
     \
     if(halstatus != HAL_OK)\
     {/*failed to start dma*/\
-        console_runtimereport(CONSOLE_ERROR,"failed to start dma");\
+        console_runtimereport(CONSOLE_ERROR,\
+            "FUNC_RECV_"#TYPE": failed to start dma");\
         goto taskfailure;\
     }\
     \
@@ -78,7 +81,8 @@ void func_recv_##TYPE(void const * argument)\
     for(;;)\
     {\
 preparepackage:\
-        buff_dma_offset = buff_size - huart_p->hdmarx->Instance->CNDTR;\
+        buff_dma_offset = buff_size - \
+                huart_p->hdmarx->Instance->CNDTR;\
         if(buff_dma_offset == buff_last_offset)\
         {/*no message available*/\
             goto taskwait;\
@@ -86,7 +90,10 @@ preparepackage:\
         memblk_p = memblk_take();\
         if(memblk_p == NULL)\
         {/*no space left*/\
-            console_runtimereport(CONSOLE_WARNING,"failed to take memblk, uart package may get lost");\
+            console_runtimereport(CONSOLE_WARNING,\
+                    "FUNC_RECV_"#TYPE":\
+                    failed to take memblk, \
+                    uart package may get lost");\
             goto taskwait;\
         }\
         /*message available and fetched memblk*/\
@@ -103,23 +110,29 @@ preparepackage:\
             }\
             if(size2cpy > memblkleft-1)\
                 size2cpy = memblkleft-1;\
-            memcpy(memblkstart_p, (void*)(buff_base+buff_last_offset),size2cpy);\
+            memcpy(memblkstart_p, \
+                    (void*)(buff_base+buff_last_offset),size2cpy);\
             memblkstart_p[size2cpy] = '\0';\
             \
             memblkstart_p = memblkstart_p + size2cpy;\
             memblkleft = memblkleft - size2cpy;\
             buff_last_offset = buff_last_offset + size2cpy;\
             buff_last_offset = buff_last_offset % buff_size;\
-        }while((memblkstart_p - memblk_p != memblk_size-1)&&(buff_last_offset != buff_dma_offset));\
+        }while((memblkstart_p - memblk_p != memblk_size-1)&&\
+                (buff_last_offset != buff_dma_offset));\
         /*reaching here means memblk is full or message is empty*/\
         osstatus = osMessagePut(queue,(uint32_t)memblk_p,0);\
         if(osstatus != osOK)\
         {\
-            console_runtimereport(CONSOLE_WARNING,"failed put package to the queue! packages is dropped!");\
+            console_runtimereport(CONSOLE_WARNING,"FUNC_RECV_"#TYPE": \
+                    failed put package to the queue! \
+                    packages is dropped!");\
            \
             if(memblk_free(memblk_p) != 0)\
             {\
-                console_runtimereport(CONSOLE_WARNING,"failed to free memblk, memory lost!");\
+                console_runtimereport(CONSOLE_WARNING,\
+                        "FUNC_RECV_"#TYPE": \
+                        failed to free memblk, memory lost!");\
             }\
         }\
         if(buff_last_offset != buff_dma_offset)\
@@ -130,9 +143,11 @@ taskwait:\
         osDelayUntil(&PreviousWakeTime, taskinterval);\
     }\
 taskfailure:\
-	console_runtimereport(CONSOLE_ERROR,"failed to start");\
+	console_runtimereport(CONSOLE_ERROR,\
+            "FUNC_RECV_"#TYPE": failed to start");\
     if(osThreadTerminate(NULL) != osOK)\
-        console_runtimereport(CONSOLE_ERROR,"failed to terminate thread");\
+        console_runtimereport(CONSOLE_ERROR,\
+                "FUNC_RECV_"#TYPE": failed to terminate thread");\
     return ;\
 }
 FUNC_RECV_COMMON_GENERATOR(wifi)
@@ -268,7 +283,35 @@ void func_handle_data(void const * argument)
                 "sourec: func_test: NULL memblk ptr");
 			continue;
 		}
-        if(osMessagePut(ctrl_t_queueHandle,(uint32_t)rptr,0) != osOK)
+        if(memblk_free(rptr) != 0)
+            console_runtimereport(CONSOLE_WARNING,\
+                    "sourec: func_test: failed to free package");
+    }
+}
+
+void func_handle_ctrl(void const * argument)
+{
+    uart_memblk_pt rptr = NULL;
+	osEvent  evt;
+    osMessageQId* queue = &ctrl_r_queueHandle;
+    for(;;)
+    {
+        evt = osMessageGet(*queue, osWaitForever);
+		if (evt.status != osEventMessage)
+		{
+			console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_test : unknown msg");
+			continue;
+		}
+        rptr = (uart_memblk_pt)evt.value.v;
+		if(rptr == NULL)
+		{
+			console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_test: NULL memblk ptr");
+			continue;
+		}
+        
+        if(osMessagePut(wifi_t_queueHandle,(uint32_t)rptr,0) != osOK)
         {    
 			console_runtimereport(CONSOLE_WARNING,\
                 "sourec: func_test: failed to put package");
@@ -278,22 +321,40 @@ void func_handle_data(void const * argument)
         }
     }
 }
-void func_handle_ctrl(void const * argument)
-{
-  for(;;)
-  {
-		osDelay(1);
-  }
-}
 
 void func_handle_wifi(void const * argument)
 {
-  for(;;)
-  {
-    osDelay(10000);
-    //console_runtimereport(CONSOLE_ERROR,"you die!");//error report
-  }
+    uart_memblk_pt rptr = NULL;
+	osEvent  evt;
+    osMessageQId* queue = &wifi_r_queueHandle;
+    for(;;)
+    {
+        evt = osMessageGet(*queue, osWaitForever);
+		if (evt.status != osEventMessage)
+		{
+			console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_test : unknown msg");
+			continue;
+		}
+        rptr = (uart_memblk_pt)evt.value.v;
+		if(rptr == NULL)
+		{
+			console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_test: NULL memblk ptr");
+			continue;
+		}
+        
+        if(osMessagePut(ctrl_t_queueHandle,(uint32_t)rptr,0) != osOK)
+        {    
+			console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_handle_wifi: failed to put package");
+            if(memblk_free(rptr) != 0)
+                console_runtimereport(CONSOLE_WARNING,\
+                    "sourec: func_handle_wifi: failed to free package");
+        }
+    }
 }
+
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -309,128 +370,3 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 
 
-//void func_send_ctrl(void const * argument)\
-//{\
-//	uart_memblk_pt rptr = NULL;\
-//	osEvent  evt;\
-//	int32_t len=0;\
-//	HAL_StatusTypeDef halstatus;\
-//	int32_t osstatus;\
-//	int status;\
-//\
-//	goto waitfor_package;\
-//	/*osSemaphoreRelease(ctrl_t_cpltHandle);*/\
-//	for(;;)\
-//	{\
-//waitfor_package:\
-//		/*step 1*/\
-//		/*wait and check event and package*/\
-//		evt = osMessageGet(ctrl_t_queueHandle, osWaitForever);\
-//		if (evt.status != osEventMessage)\
-//		{\
-//			console_runtimereport(CONSOLE_WARNING, "unknown msg");\
-//			continue;\
-//		}\
-//		rptr = (uart_memblk_pt)evt.value.v;\
-//		if(rptr == NULL)\
-//		{\
-//			console_runtimereport(CONSOLE_WARNING, "NULL memblk ptr");\
-//			continue;\
-//		}\
-//\
-//		goto send_package;\
-//send_package:\
-//		/*step2*/\
-//		/*successed receive block*/\
-//		/*try to send package*/\
-//		/*need to free block before next loop;*/\
-//\
-//		/*in case of invalid string*/\
-//		((uint8_t *)rptr)[MEM_BLOCK_SIZE-1] = 0;\
-//		len = strlen((char*)rptr);\
-//		if(len <= 0)\
-//		{\
-//			console_runtimereport(CONSOLE_WARNING,"empty string");\
-//			goto free_memblk;\
-//		}\
-//		osSemaphoreWait(ctrl_t_cpltHandle, 0);\
-//		/*//clean semaphore//no check*/\
-//		halstatus =	HAL_UART_Transmit_DMA(&huartctrl,(uint8_t *)rptr,len);\
-//		if(halstatus != HAL_OK)\
-//		{\
-//			console_runtimereport(CONSOLE_WARNING,"failed to start dma");\
-//			goto free_memblk;\
-//		}\
-//		/*wait for dma transmit cplt*/\
-//		osstatus = osSemaphoreWait(ctrl_t_cpltHandle,SEND_TIME_OUT);\
-//		if(osstatus != osOK)\
-//		{\
-//			console_runtimereport(CONSOLE_ERROR,"tx dma time out");\
-//			goto free_memblk;\
-//		}\
-//\
-//free_memblk:\
-//		/*step 3*/\
-//		/*free memory block*/\
-//		status = memblk_free((void*)rptr);\
-//		if(status < 0)\
-//		{\
-//			console_runtimereport(CONSOLE_ERROR,"failed to free memblk");\
-//			goto waitfor_package;\
-//		}\
-//		goto waitfor_package;\
-//	}\
-//	/*return;*/\
-//}\
-
-
-//        if(buff_last_offset < buff_dma_offset)
-//        {/*dma not reloaded*/
-//            if(buff_dma_offset-buff_last_offset > (memblk_size-1))
-//            {//cannot deliver in one package
-//                memcpy(memblk_p, (void*)(buff_base[buff_last_offset]),memblk_size-1);
-//                memblk_p[MEM_BLOCK_SIZE-1] = '\0';
-//                buff_last_offset = buff_dma_offset;
-//            }
-//            else
-//            {//can deliver in one package
-//                memcpy(memblk_p, (void*)(buff_base[buff_last_offset]),buff_dma_offset-buff_last_offset);
-//                memblk_p[buff_dma_offset-buff_last_offset] = '\0';
-//            }
-//        }
-//        else if(buff_last_offset > buff_dma_offset)
-//        {
-//        /*dma reloaded*/
-//        /*v <-- buff_base           */
-//        /*0 1 2 3 4 5 6 7 8 9 10    */
-//        /*d d d x x x x x d d d     */
-//        /*      ^         ^         */
-//        /*dma_offset:3 lastoffset:8 */
-//        /*    if(buff_size - buff_last_offset + buff_dma_offset > (MEM_BLOCK_SIZE-1))
-//            {//cannot deliver in one package
-//                memcpy(memblk_p, (void*)(buff_base[buff_last_offset]),buff_size - buff_last_offset);
-//                memcpy(memblk_p, (void*)(buff_base[buff_last_offset]),buff_size - buff_last_offset);
-//                memblk_p[MEM_BLOCK_SIZE-1] = '\0';
-//                buff_last_offset = buff_dma_offset;
-//            }
-//            else
-//            {//can deliver in one package
-//                memcpy(memblk_p, (void*)(buff_base[buff_last_offset]),buff_dma_offset-buff_last_offset);
-//                memblk_p[buff_dma_offset-buff_last_offset] = '\0';
-//            }
-//        */
-//            temp_p = memblk_p-1;
-//            do{
-//                temp_p[0] = buff_base[buff_last_offset];
-//                temp_p ++;
-//                buff_last_offset++;
-//                buff_last_offset = buff_last_offset%buff_size;
-//                
-//            }while(buff_last_offset != buff_dma_offset);
-//            
-//        }
-//        else
-//        {/*don't know what happened*/
-//            console_runtimereport(CONSOLE_ERROR,"unknown offset, shouldn't happen");
-//        }
-//        
