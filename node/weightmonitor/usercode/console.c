@@ -30,7 +30,7 @@ int console_problemhandle(CONSOLE_LEVEL level, char * file, char * line, char* m
             strncpy(p,"",MEM_BLOCK_SIZE-1);
         else
             snprintf(p, MEM_BLOCK_SIZE-1, "\r\nlost warnings cnt : %d",unreportedwarningcnt);
-        strncat(p, "\r\nWarning Report:",MEM_BLOCK_SIZE - strlen(p)-1);
+        strncat(p, "\r\nWarning: ",MEM_BLOCK_SIZE - strlen(p)-1);
         strncat(p, "\r\nfile: ", MEM_BLOCK_SIZE - strlen(p)-1);
         strncat(p, file, MEM_BLOCK_SIZE - strlen(p));
         strncat(p, "\r\nline: ", MEM_BLOCK_SIZE - strlen(p)-1);
@@ -55,10 +55,10 @@ int console_problemhandle(CONSOLE_LEVEL level, char * file, char * line, char* m
     else// if(level == CONSOLE_ERROR)
     {
         osThreadSuspendAll();
-        strcpy(consolersv, "\r\nError Report:\r\nSystem halted!");
-        strncat(consolersv, "\r\nin line: ", MEM_BLOCK_SIZE - strlen(consolersv)-1);
+        strcpy(consolersv, "\r\nError: ");
+        strncat(consolersv, "\r\nline: ", MEM_BLOCK_SIZE - strlen(consolersv)-1);
         strncat(consolersv, line, MEM_BLOCK_SIZE - strlen(consolersv));
-        strncat(consolersv, "\r\nin file: ", MEM_BLOCK_SIZE - strlen(consolersv)-1);
+        strncat(consolersv, "\r\nfile: ", MEM_BLOCK_SIZE - strlen(consolersv)-1);
         strncat(consolersv, file, MEM_BLOCK_SIZE - strlen(consolersv)-1);
         strncat(consolersv, "\r\nMSG: ", MEM_BLOCK_SIZE - strlen(consolersv)-1);
         strncat(consolersv, msg, MEM_BLOCK_SIZE - strlen(consolersv)-1);

@@ -15,14 +15,37 @@
 #include "memblk.h"
 #include "usart.h"
 #include "console.h"
+#include "mainthread.h"
 
 
 char UART1_BUFF[UART1_BUFF_SIZE] = {0};
 char UART2_BUFF[UART2_BUFF_SIZE] = {0};
 char UART3_BUFF[UART3_BUFF_SIZE] = {0};
 
+//do not use this function
 //receive a message
-uart_memblk_pt uart_receive(char *uartname, uint32_t time);
+uart_memblk_pt uart_receive(UART_HandleTypeDef* huart_p, uint32_t timems)
+{
+//    uart_memblk_pt rptr = NULL;
+//	osEvent  evt;
+//    osMessageQId* queue_p;
+//    //UART_HandleTypeDef* huart_p;
+//    if(huart_p == &huartwifi)
+//        queue_p = &wifi_r_queueHandle;
+//    else if(huart_p == &huartctrl)
+//        queue_p = &ctrl_r_queueHandle;
+//    else if(huart_p == &huartdata)
+//        queue_p = &data_r_queueHandle;
+//    else
+//        return NULL;
+//    
+//    evt = osMessageGet(*queue_p, timems);
+//	if (evt.status != osEventMessage)
+//	{
+//        return NULL;
+//    }
+    return NULL;
+}
 
 ////warning!!!!!!!!!!!!!!!input of uart should not be '\0'//////
 ///or there may be err///
@@ -91,9 +114,9 @@ preparepackage:\
         if(memblk_p == NULL)\
         {/*no space left*/\
             console_runtimereport(CONSOLE_WARNING,\
-                    "FUNC_RECV_"#TYPE":\
-                    failed to take memblk, \
-                    uart package may get lost");\
+                    "FUNC_RECV_"#TYPE\
+                    " :failed to take memblk,"\
+                    "uart package may get lost");\
             goto taskwait;\
         }\
         /*message available and fetched memblk*/\
@@ -124,15 +147,15 @@ preparepackage:\
         osstatus = osMessagePut(queue,(uint32_t)memblk_p,0);\
         if(osstatus != osOK)\
         {\
-            console_runtimereport(CONSOLE_WARNING,"FUNC_RECV_"#TYPE": \
-                    failed put package to the queue! \
-                    packages is dropped!");\
+            console_runtimereport(CONSOLE_WARNING,"FUNC_RECV_"#TYPE\
+                    ": failed put package to the queue! "\
+                    "packages is dropped!");\
            \
             if(memblk_free(memblk_p) != 0)\
             {\
                 console_runtimereport(CONSOLE_WARNING,\
-                        "FUNC_RECV_"#TYPE": \
-                        failed to free memblk, memory lost!");\
+                        "FUNC_RECV_"#TYPE\
+                        ": failed to free memblk, memory lost!");\
             }\
         }\
         if(buff_last_offset != buff_dma_offset)\
@@ -248,28 +271,11 @@ void func_handle_data(void const * argument)
 {
     uart_memblk_pt rptr = NULL;
 	osEvent  evt;
+    char* charp = NULL;
+    int cnt = 0;
     for(;;)
     {
-        //p = memblk_take();
-        //if(p == NULL)
-        //    continue;
-        //snprintf(p, MEM_BLOCK_SIZE,"hello!\r\n");
-		//uart_transmit(ctrl,p,100);
-        //osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
-        //osDelay(1000);
-        
-        //p = memblk_take();
-        //if(p == NULL)
-        //    continue;
-        //snprintf(p, MEM_BLOCK_SIZE,"this is uartctrl!\r\n");
-        //uart_transmit(ctrl,p,100);
-		//osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
-        //osDelay(1000);
-        
-        //console_runtimereport(CONSOLE_WARNING,"fuck! ""unknown huart");
-        //console_runtimereport(CONSOLE_WARNING,"fuck! ""unknown huart");
-        //osDelay(1000);
-        evt = osMessageGet(ctrl_r_queueHandle, osWaitForever);
+        evt = osMessageGet(data_r_queueHandle, osWaitForever);
 		if (evt.status != osEventMessage)
 		{
 			console_runtimereport(CONSOLE_WARNING,\
@@ -283,11 +289,70 @@ void func_handle_data(void const * argument)
                 "sourec: func_test: NULL memblk ptr");
 			continue;
 		}
+        charp = (char*)rptr;
+        charp[MEM_BLOCK_SIZE - 1] = '\0';
+        for(cnt = 0; cnt < MEM_BLOCK_SIZE; cnt++)
+        {
+            if(*charp == '\0')//end of data in memory block
+                break;
+            if(osMessagePut( datarecv_queueHandle,(uint32_t)*charp,0) != osOK)
+            {
+                console_runtimereport(CONSOLE_WARNING,\
+                    "sourec: func_test: "\
+                    "failed to put char to datarecv_queueHandle");
+                break;
+            }
+            charp++;
+        }
         if(memblk_free(rptr) != 0)
             console_runtimereport(CONSOLE_WARNING,\
                     "sourec: func_test: failed to free package");
     }
 }
+
+void func_handle_wifi(void const * argument)
+{
+    uart_memblk_pt rptr = NULL;
+	osEvent  evt;
+    char* charp = NULL;
+    int cnt = 0;
+    for(;;)
+    {
+        evt = osMessageGet(wifi_r_queueHandle, osWaitForever);
+		if (evt.status != osEventMessage)
+		{
+			console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_test : unknown msg");
+			continue;
+		}
+        rptr = (uart_memblk_pt)evt.value.v;
+		if(rptr == NULL)
+		{
+			console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_test: NULL memblk ptr");
+			continue;
+		}
+        charp = (char*)rptr;
+        charp[MEM_BLOCK_SIZE - 1] = '\0';
+        for(cnt = 0; cnt < MEM_BLOCK_SIZE; cnt++)
+        {
+            if(*charp == '\0')//end of wifi in memory block
+                break;
+            if(osMessagePut( wifirecv_queueHandle,(uint32_t)*charp,0) != osOK)
+            {
+                console_runtimereport(CONSOLE_WARNING,\
+                    "sourec: func_test: "\
+                    "failed to put char to wifirecv_queueHandle");
+                break;
+            }
+            charp++;
+        }
+        if(memblk_free(rptr) != 0)
+            console_runtimereport(CONSOLE_WARNING,\
+                    "sourec: func_test: failed to free package");
+    }
+}
+
 
 void func_handle_ctrl(void const * argument)
 {
@@ -300,58 +365,25 @@ void func_handle_ctrl(void const * argument)
 		if (evt.status != osEventMessage)
 		{
 			console_runtimereport(CONSOLE_WARNING,\
-                "sourec: func_test : unknown msg");
+                "sourec: func_handle_ctrl : unknown msg");
 			continue;
 		}
         rptr = (uart_memblk_pt)evt.value.v;
 		if(rptr == NULL)
 		{
 			console_runtimereport(CONSOLE_WARNING,\
-                "sourec: func_test: NULL memblk ptr");
+                "sourec: func_handle_ctrl: NULL memblk ptr");
 			continue;
 		}
         
-        if(osMessagePut(wifi_t_queueHandle,(uint32_t)rptr,0) != osOK)
-        {    
-			console_runtimereport(CONSOLE_WARNING,\
-                "sourec: func_test: failed to put package");
+        //if(osMessagePut(wifi_t_queueHandle,(uint32_t)rptr,0) != osOK)
+        //{    
+			//console_runtimereport(CONSOLE_WARNING,\
+                "sourec: func_handle_ctrl: failed to put package");
             if(memblk_free(rptr) != 0)
                 console_runtimereport(CONSOLE_WARNING,\
-                    "sourec: func_test: failed to free package");
-        }
-    }
-}
-
-void func_handle_wifi(void const * argument)
-{
-    uart_memblk_pt rptr = NULL;
-	osEvent  evt;
-    osMessageQId* queue = &wifi_r_queueHandle;
-    for(;;)
-    {
-        evt = osMessageGet(*queue, osWaitForever);
-		if (evt.status != osEventMessage)
-		{
-			console_runtimereport(CONSOLE_WARNING,\
-                "sourec: func_test : unknown msg");
-			continue;
-		}
-        rptr = (uart_memblk_pt)evt.value.v;
-		if(rptr == NULL)
-		{
-			console_runtimereport(CONSOLE_WARNING,\
-                "sourec: func_test: NULL memblk ptr");
-			continue;
-		}
-        
-        if(osMessagePut(ctrl_t_queueHandle,(uint32_t)rptr,0) != osOK)
-        {    
-			console_runtimereport(CONSOLE_WARNING,\
-                "sourec: func_handle_wifi: failed to put package");
-            if(memblk_free(rptr) != 0)
-                console_runtimereport(CONSOLE_WARNING,\
-                    "sourec: func_handle_wifi: failed to free package");
-        }
+                    "sourec: func_handle_ctrl: failed to free package");
+        //}
     }
 }
 
@@ -368,5 +400,114 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 		console_runtimereport(CONSOLE_WARNING,"unknown txcplt huart");
 }
 
+//void func_handle_data(void const * argument)
+//{
+//    uart_memblk_pt rptr = NULL;
+//	osEvent  evt;
+//    for(;;)
+//    {
+//        //p = memblk_take();
+//        //if(p == NULL)
+//        //    continue;
+//        //snprintf(p, MEM_BLOCK_SIZE,"hello!\r\n");
+//		//uart_transmit(ctrl,p,100);
+//        //osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
+//        //osDelay(1000);
+//        
+//        //p = memblk_take();
+//        //if(p == NULL)
+//        //    continue;
+//        //snprintf(p, MEM_BLOCK_SIZE,"this is uartctrl!\r\n");
+//        //uart_transmit(ctrl,p,100);
+//		//osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0);
+//        //osDelay(1000);
+//        
+//        //console_runtimereport(CONSOLE_WARNING,"fuck! ""unknown huart");
+//        //console_runtimereport(CONSOLE_WARNING,"fuck! ""unknown huart");
+//        //osDelay(1000);
+//        evt = osMessageGet(ctrl_r_queueHandle, osWaitForever);
+//		if (evt.status != osEventMessage)
+//		{
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_test : unknown msg");
+//			continue;
+//		}
+//        rptr = (uart_memblk_pt)evt.value.v;
+//		if(rptr == NULL)
+//		{
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_test: NULL memblk ptr");
+//			continue;
+//		}
+//        if(memblk_free(rptr) != 0)
+//            console_runtimereport(CONSOLE_WARNING,\
+//                    "sourec: func_test: failed to free package");
+//    }
+//}
 
+//void func_handle_ctrl(void const * argument)
+//{
+//    uart_memblk_pt rptr = NULL;
+//	osEvent  evt;
+//    osMessageQId* queue = &ctrl_r_queueHandle;
+//    for(;;)
+//    {
+//        evt = osMessageGet(*queue, osWaitForever);
+//		if (evt.status != osEventMessage)
+//		{
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_test : unknown msg");
+//			continue;
+//		}
+//        rptr = (uart_memblk_pt)evt.value.v;
+//		if(rptr == NULL)
+//		{
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_test: NULL memblk ptr");
+//			continue;
+//		}
+//        
+//        if(osMessagePut(wifi_t_queueHandle,(uint32_t)rptr,0) != osOK)
+//        {    
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_test: failed to put package");
+//            if(memblk_free(rptr) != 0)
+//                console_runtimereport(CONSOLE_WARNING,\
+//                    "sourec: func_test: failed to free package");
+//        }
+//    }
+//}
+
+//void func_handle_wifi(void const * argument)
+//{
+//    uart_memblk_pt rptr = NULL;
+//	osEvent  evt;
+//    osMessageQId* queue = &wifi_r_queueHandle;
+//    for(;;)
+//    {
+//        evt = osMessageGet(*queue, osWaitForever);
+//		if (evt.status != osEventMessage)
+//		{
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_test : unknown msg");
+//			continue;
+//		}
+//        rptr = (uart_memblk_pt)evt.value.v;
+//		if(rptr == NULL)
+//		{
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_test: NULL memblk ptr");
+//			continue;
+//		}
+//        
+//        if(osMessagePut(ctrl_t_queueHandle,(uint32_t)rptr,0) != osOK)
+//        {    
+//			console_runtimereport(CONSOLE_WARNING,\
+//                "sourec: func_handle_wifi: failed to put package");
+//            if(memblk_free(rptr) != 0)
+//                console_runtimereport(CONSOLE_WARNING,\
+//                    "sourec: func_handle_wifi: failed to free package");
+//        }
+//    }
+//}
 

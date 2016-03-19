@@ -51,12 +51,15 @@ osThreadId handle_wifiHandle;
 osThreadId send_dataHandle;
 osThreadId send_ctrlHandle;
 osThreadId send_wifiHandle;
+osThreadId mainthreadHandle;
 osMessageQId data_r_queueHandle;
 osMessageQId data_t_queueHandle;
 osMessageQId wifi_r_queueHandle;
 osMessageQId wifi_t_queueHandle;
 osMessageQId ctrl_r_queueHandle;
 osMessageQId ctrl_t_queueHandle;
+osMessageQId datarecv_queueHandle;
+osMessageQId wifirecv_queueHandle;
 osTimerId led0Handle;
 osSemaphoreId data_t_cpltHandle;
 osSemaphoreId wifi_t_cpltHandle;
@@ -77,6 +80,7 @@ extern void func_handle_wifi(void const * argument);
 extern void func_send_data(void const * argument);
 extern void func_send_ctrl(void const * argument);
 extern void func_send_wifi(void const * argument);
+extern void func_mainthread(void const * argument);
 extern void Callback_led0(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -118,7 +122,7 @@ void MX_FREERTOS_Init(void) {
   /* Create the timer(s) */
   /* definition and creation of led0 */
   osTimerDef(led0, Callback_led0);
-  led0Handle = osTimerCreate(osTimer(led0), osTimerPeriodic, NULL);
+  led0Handle = osTimerCreate(osTimer(led0), osTimerOnce, NULL);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -126,7 +130,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityIdle, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of recv_data */
@@ -165,6 +169,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(send_wifi, func_send_wifi, osPriorityHigh, 0, 128);
   send_wifiHandle = osThreadCreate(osThread(send_wifi), NULL);
 
+  /* definition and creation of mainthread */
+  osThreadDef(mainthread, func_mainthread, osPriorityNormal, 0, 128);
+  mainthreadHandle = osThreadCreate(osThread(mainthread), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -193,6 +201,14 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of ctrl_t_queue */
   osMessageQDef(ctrl_t_queue, 4, uart_memblk_pt );
   ctrl_t_queueHandle = osMessageCreate(osMessageQ(ctrl_t_queue), NULL);
+
+  /* definition and creation of datarecv_queue */
+  osMessageQDef(datarecv_queue, 256, char);
+  datarecv_queueHandle = osMessageCreate(osMessageQ(datarecv_queue), NULL);
+
+  /* definition and creation of wifirecv_queue */
+  osMessageQDef(wifirecv_queue, 256, char);
+  wifirecv_queueHandle = osMessageCreate(osMessageQ(wifirecv_queue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
