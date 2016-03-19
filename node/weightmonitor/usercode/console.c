@@ -78,6 +78,7 @@ int console_problemhandle(CONSOLE_LEVEL level, char * file, char * line, char* m
             HAL_Delay(ON_TIME_L);
             HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_LEDOFF);
             HAL_Delay(OFF_TIME); 
+            
             HAL_UART_Transmit_DMA(&huartctrl,(uint8_t *)consolersv, strlen(consolersv));
         }
     }
