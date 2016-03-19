@@ -3,7 +3,7 @@
 
 #include "cmsis_os.h"
 #define MEM_BLOCK_SIZE 128
-#define MEM_BLOCK_NUM 16
+#define MEM_BLOCK_NUM 32
 
 typedef char memblk_t[MEM_BLOCK_SIZE]; 
 

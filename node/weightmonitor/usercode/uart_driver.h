@@ -5,16 +5,21 @@
 
 //buff size setting
 /////////////////////////////////////////////////////////////////////////////
-#define UART_QUIERY_INTERVAL 20 //ms
+#define UARTctrl_QUIERY_INTERVAL 22 //22.222222ms
+#define UARTdata_QUIERY_INTERVAL 133//133.333333ms
+#define UARTwifi_QUIERY_INTERVAL 22 //22.222222ms
 //115200 bps
-//(((uint32_t)(115200/10*(UART_QUIERY_INTERVAL/1000.0)*2/4+0.5))*4) = 460.8
-#define UARTctrl_BUFF_SIZE 464
+//(115200/10*(UART_QUIERY_INTERVAL/1000.0)*2
+//	= 23.04*UART_QUIERY_INTERVAL
+#define UARTctrl_BUFF_SIZE 512
 //9600 bps
-//(((uint32_t)(9600/10*(UART_QUIERY_INTERVAL/1000.0)*2/4+0.5))*4) = 38.4
-#define UARTdata_BUFF_SIZE 40
+//(9600/10*(UART_QUIERY_INTERVAL/1000.0)*2
+//	= 1.92*UART_QUIERY_INTERVAL
+#define UARTdata_BUFF_SIZE 256
 //115200 bps
-//(((uint32_t)(115200/10*(UART_QUIERY_INTERVAL/1000.0)*2/4+0.5))*4) = 460.8
-#define UARTwifi_BUFF_SIZE  464
+//(115200/10*(UART_QUIERY_INTERVAL/1000.0)*2
+//	= 23.04*UART_QUIERY_INTERVAL
+#define UARTwifi_BUFF_SIZE  512
 
 //uart redifine
 ////////////////////////////////////////////////////////////////////////////

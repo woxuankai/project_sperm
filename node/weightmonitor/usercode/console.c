@@ -5,7 +5,8 @@
 #include "usart.h"
 #include "uart_driver.h"
 
-uint32_t unreportedwarningcnt = 0;
+int32_t unreportedwarningcnt = 0;
+int32_t unreportedwarningcnt_continues = 0;
 
 char consolersv[MEM_BLOCK_SIZE];
 
@@ -14,13 +15,22 @@ int console_problemhandle(CONSOLE_LEVEL level, char * file, char * line, char* m
     char* p;
     if(level == CONSOLE_WARNING)
     {
+        if(unreportedwarningcnt_continues > 20)
+        {
+            console_problemhandle(CONSOLE_ERROR , file, line, msg);
+        }
         p = memblk_take();
         if(p == NULL)
         {
             unreportedwarningcnt++;
+            unreportedwarningcnt_continues++;
             return -1;
         }
-        strcpy(p, "\r\nWarning Report:");
+        if(unreportedwarningcnt == 0)
+            strncpy(p,"",MEM_BLOCK_SIZE-1);
+        else
+            snprintf(p, MEM_BLOCK_SIZE-1, "\r\nlost warnings cnt : %d",unreportedwarningcnt);
+        strncat(p, "\r\nWarning Report:",MEM_BLOCK_SIZE - strlen(p)-1);
         strncat(p, "\r\nfile: ", MEM_BLOCK_SIZE - strlen(p)-1);
         strncat(p, file, MEM_BLOCK_SIZE - strlen(p));
         strncat(p, "\r\nline: ", MEM_BLOCK_SIZE - strlen(p)-1);
@@ -29,11 +39,15 @@ int console_problemhandle(CONSOLE_LEVEL level, char * file, char * line, char* m
         strncat(p, msg, MEM_BLOCK_SIZE - strlen(p)-1);
         strncat(p, "\r\n", MEM_BLOCK_SIZE - strlen(p)-1);
         if(osOK == osMessagePut(ctrl_t_queueHandle,(uint32_t)p,0))
+        {
+            unreportedwarningcnt_continues = 0;
             return 0;
+        }
         else
         {
             memblk_free(p);
             unreportedwarningcnt++;
+            unreportedwarningcnt_continues++;
             return -1;
         }
     }
