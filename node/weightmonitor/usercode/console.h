@@ -6,6 +6,7 @@
 
 typedef enum 
 {
+    CONSOLE_MESSAGE,
     CONSOLE_ERROR,
     CONSOLE_WARNING
 } CONSOLE_LEVEL;

@@ -2,27 +2,21 @@
 #define LEDCTRL_H
 
 #include <stdint.h>
-/*
 
-enum LEDCMD
+enum leddevices
 {
-//	LEDCMD_QUERYPERIOD,
-	LEDCMD_QUERYDUTY,
-//	LEDCMD_SETPERIOD,
-	LEDCMD_SETDUTY,
+    devLED0,
 };
 
-extern int32_t ledctl(int32_t dev, uint32_t cmd, int32_t arg);
+
+int32_t ledflash(int dev, int time);
 
 
+#define LED_GPIO_ON GPIO_PIN_RESET
+#define LED_GPIO_OFF GPIO_PIN_SET
 
-*/
-
-int32_t led0changeperiod(int period);
-int32_t	led0start(void);
-int32_t led0stop(void);
-
-
-
+#define LED_ON(devLED) HAL_GPIO_WritePin(devLED##_GPIO_Port,devLED##_Pin,LED_GPIO_ON)
+#define LED_OFF(devLED) HAL_GPIO_WritePin(devLED##_GPIO_Port,devLED##_Pin,LED_GPIO_OFF)
+#define LED_TOGGLE(devLED) HAL_GPIO_TogglePin(devLED##_GPIO_Port,devLED##_Pin)
 
 #endif

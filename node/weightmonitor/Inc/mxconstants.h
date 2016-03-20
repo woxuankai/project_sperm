@@ -38,8 +38,8 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define LED0_Pin GPIO_PIN_13
-#define LED0_GPIO_Port GPIOC
+#define devLED0_Pin GPIO_PIN_13
+#define devLED0_GPIO_Port GPIOC
 #define Wifi_En_Pin GPIO_PIN_2
 #define Wifi_En_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

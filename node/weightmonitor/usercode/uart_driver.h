@@ -52,6 +52,6 @@ typedef uart_memblk_t* uart_memblk_pt;
 //func
 //transmit a message
 #define uart_transmit(TYPE, p, timeout) \
-	osMessagePut(TYPE##_t_queueHandle,(uint32_t)p,timeout);
+	osMessagePut(TYPE##_t_queueHandle,(uint32_t)p,timeout)
 
 #endif
