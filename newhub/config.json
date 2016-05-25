@@ -1,0 +1,9 @@
+{
+	"node1":
+	{
+		"id":1,
+		"devname":"/dev/ttyUSB0",
+		"baudrate":9600,
+		"srvaddr":"http://211.83.111.245/biaoben/receive.php"
+	}
+}

@@ -8,6 +8,7 @@
 #include "uart_driver.h"
 #include <string.h>
 #include "ledctrl.h"
+#include "iwdg.h"
 
 char* string_ready =    "dy\r\n";
 char* string_OK =       "OK\r\n";
@@ -207,11 +208,15 @@ int waitfordata(memblk_t* memblk, uint32_t timeout,osMessageQId* queue_p)
         return -1;
     for(i=0; i<= MEM_BLOCK_SIZE-1; i++)
     {
+        *pdata = 'c';i++;pdata++;
+        *pdata = '1';i++;pdata++;
+        *pdata = ':';i++;pdata++;
+        
         WAITCHAR(gotchar)
         if(gotchar == '\r')
         {
             *pdata = '\0';
-            WAITCHAR(gotchar);//assum there is a \n after \n
+            WAITCHAR(gotchar);//assume there is a \n after \r
             return 0;
         }
         *pdata = gotchar;
@@ -229,7 +234,7 @@ char cmdsendstr[] = "AT+CIPSEND=008\r\n";
 void func_mainthread(void const * argument)
 {
     char * returnstr;
-    osEvent  evt;
+    //osEvent  evt;
     char * p;
     int status;
     int failedtime=0;
@@ -384,7 +389,7 @@ setESP8266wifiinfo:
                 "sourec: func_mainthread: "\
                 "ESP8266 ssid and pwd changed"\
                 "\r\nIP got");
-        goto infiniteloop;
+        goto startiwdg;
     }
     else
     {
@@ -409,6 +414,15 @@ setESP8266wifiinfo:
 //                "sourec: func_mainthread: "\
 //                "EPS8266 connected to wifi");
 //    }
+    
+startiwdg:
+    HAL_IWDG_Start(&hiwdg);
+    console_runtimereport(CONSOLE_MESSAGE,\
+        "sourec: func_mainthread: "\
+        "IWDG started!"\
+        "\r\ncome to infinite loop!");
+    goto infiniteloop;
+    
     for(;;)
     {
 /*
@@ -429,12 +443,13 @@ infiniteloop:
                 "Initialization finished!");
         LED_OFF(devLED0);
 waitfordata:
+        HAL_IWDG_Refresh(&hiwdg);
         //osEventTimeout = 
+        //do{
+        //    evt = osMessageGet(datarecv_queueHandle, 0);
+        //}while(evt.status == osEventMessage);
         do{
-            evt = osMessageGet(datarecv_queueHandle, 0);
-        }while(evt.status == osEventMessage);
-        do{
-        #define WAITFORDATATIMEOUT 60000
+        #define WAITFORDATATIMEOUT 20000
             status = waitfordata((memblk_t*)mainthreaddatabuff,\
                             WAITFORDATATIMEOUT,&datarecv_queueHandle);
             if(status == -2)
@@ -451,14 +466,17 @@ waitfordata:
                         "waitfordata returned error"\
                         "\r\nretry");
             }
+            HAL_IWDG_Refresh(&hiwdg);
         }while(status != 0);
         //strcpy(mainthreaddatabuff,"c2:135.45\r\n");
         datalen = strlen(mainthreaddatabuff) - 2;
         goto tcpconnect;
 tcpconnect:
+        HAL_IWDG_Refresh(&hiwdg);
         osDelay(2000);
         ESP8266sendcmd("AT+CIPSTART=\"TCP\",\"192.168.1.164\",2333\r\n",init,3,5000);
         returnstr = waitforstring(5000,&wifirecv_queueHandle);
+        HAL_IWDG_Refresh(&hiwdg);
         if(returnstr == NULL)
         {
             console_runtimereport(CONSOLE_WARNING,\
@@ -483,6 +501,7 @@ tcpconnect:
             goto init;
         }
 sendpackprepare:
+        HAL_IWDG_Refresh(&hiwdg);
         osDelay(2000);
         if(strlen(cmdsendstr) > 999)
         {
@@ -521,6 +540,7 @@ sendpackprepare:
             goto init;
         }
 sendpackage:
+        HAL_IWDG_Refresh(&hiwdg);
         osDelay(4000);
         //ESP8266sendcmd("c2:13.45\r\n",init,3,5000);
         ESP8266sendcmd(mainthreaddatabuff,init,3,5000);
@@ -551,6 +571,7 @@ sendpackage:
             goto init;
         }
 finishtransmit:
+        HAL_IWDG_Refresh(&hiwdg);
         ledflash(devLED0,200);
         goto waitfordata;
     }

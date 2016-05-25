@@ -12,8 +12,15 @@ def proclink(sock, addr, clients_dict):
 	print("received !")
 	#print('Received from ',addr)
 	#print('content :',data)
-	cname, cweight = data.split(':')
-	#print(cname,",",cweight)
+	cname, cdata = data.split(':')
+	cweight = cdata[7:14]
+	if cdata[0:7] != 'ST,GS,+':
+	    print('Error data format!')
+	    return -1
+	if cdata[14:16] != 'kg':
+	    print('Error data unit!')
+	    return -1
+        #print(cname,",",cweight)
 	if cname in clients_dict :
 		print("uploading...")
 		try :
