@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-addr = "http://211.83.111.245/biaoben/img_receive.php"
-imgfilepath = "/tmp/img.jpg"
+configfilepath = './config_img.json'
+
+
 
 import pygame, pygame.camera
 from urllib import request, parse
@@ -41,13 +42,41 @@ def uploadoneframe(serveraddr,imgpath):
 		#resdict = json.loads(res.decode('utf-8'))
 	return res.decode('utf-8')
 
+import datetime
+def gettimestr():
+	return str(datetime.datetime.now())
 
+import json
+def getconfig(filepath):
+    with open(filepath, 'r') as f:
+        s = f.read()
+    config = json.loads(s)
+    return config
+
+
+
+
+
+import time
 if __name__ == '__main__':
-	#capture and save a frame
-	caponeframe(imgpath=imgfilepath, dev="/dev/video1", resolution=(640,480))
-	#upload a frame
-	#result = uploadoneframe(addr, "../testimgs/1.jpg")
-	#result = uploadoneframe(addr, "./postdata.py")
-	#print(result)
-	#uploadoneframe(addr, imgfilepath)
+	config = getconfig(configfilepath)
+	addr = config['addr']
+	imgfilepath = config['imgfilepath']
+	timeinterval = float(config['timeinterval'])
+	timenext = time.time()
+	while(1):
+		timenext = timenext + timeinterval
+		#capture and save a frame
+		print(gettimestr(),': session start')
+		caponeframe(imgpath=imgfilepath, dev="/dev/video0", resolution=(640,480))
+		print(gettimestr(),': captured')
+		#upload a frame
+		#result = uploadoneframe(addr, "../testimgs/1.jpg")
+		#result = uploadoneframe(addr, "./postdata.py")
+		#print(result)
+		result = uploadoneframe(addr, imgfilepath)
+		print(gettimestr(),': uploaded')
+		print('result: ',result)
+		time.sleep(timenext-time.time())
+
 
