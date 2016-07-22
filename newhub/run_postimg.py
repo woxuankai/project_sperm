@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 configfilepath = './config_img.json'
-
-
 
 import pygame, pygame.camera
 from urllib import request, parse
@@ -53,18 +50,20 @@ def getconfig(filepath):
     config = json.loads(s)
     return config
 
-
-
-
-
-import time
+import time, os
 if __name__ == '__main__':
+	if configfilepath[0] != '/':
+		BASE_DIR = os.path.dirname(__file__)
+		configfilepath = os.path.join(BASE_DIR, configfilepath)
 	config = getconfig(configfilepath)
 	addr = config['addr']
 	imgfilepath = config['imgfilepath']
 	timeinterval = config['timeinterval']
 	videodevice = config['videodevice']
 	resolution = config['resolution']
+	if imgfilepath[0] != '/':
+		BASE_DIR = os.path.dirname(__file__)
+		imgfilepath = os.path.join(BASE_DIR, imgfilepath)
 	timenext = time.time()
 	while(1):
 		timenext = timenext + timeinterval
@@ -84,5 +83,3 @@ if __name__ == '__main__':
 			print(gettimestr(),': uploaded')
 			print('result: ',result)
 		time.sleep(timenext-time.time())
-
-

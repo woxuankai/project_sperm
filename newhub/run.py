@@ -10,6 +10,9 @@ if __name__ == '__main__':
 	print('program start!')
 	#get nodes info
 	try:
+		if configfilepath[0] != '/':
+			BASE_DIR = os.path.dirname(__file__)
+			configfilepath = os.path.join(BASE_DIR, configfilepath)
 		nodes=getnodes(configfilepath);
 	except Exception as e:
 		print('fail to  parse file: ',configfilepath)
