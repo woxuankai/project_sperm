@@ -62,13 +62,15 @@ if __name__ == '__main__':
 	config = getconfig(configfilepath)
 	addr = config['addr']
 	imgfilepath = config['imgfilepath']
-	timeinterval = float(config['timeinterval'])
+	timeinterval = config['timeinterval']
+	videodevice = config['videodevice']
+	resolution = config['resolution']
 	timenext = time.time()
 	while(1):
 		timenext = timenext + timeinterval
 		#capture and save a frame
 		print(gettimestr(),': session start')
-		caponeframe(imgpath=imgfilepath, dev="/dev/video0", resolution=(640,480))
+		caponeframe(imgfilepath, videodevice, resolution)
 		print(gettimestr(),': captured')
 		#upload a frame
 		#result = uploadoneframe(addr, "../testimgs/1.jpg")
