@@ -6,5 +6,14 @@ def parsedata(data):
 
 from postdata import postdata
 def uploaddata(data, nodeinfo):
-    weight = parsedata(data)
-    res = postdata(nodeinfo['srvaddr'], nodeinfo['id'] , weight)
+	try:
+		weight = parsedata(data)
+	except Exception as e:
+		print("error data format")
+		return 0
+	try:
+		postdata(nodeinfo['srvaddr'], nodeinfo['id'] , weight)
+	except Exception as e:
+		print("failed to post")
+	finally:
+		return 0

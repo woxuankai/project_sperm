@@ -76,9 +76,13 @@ if __name__ == '__main__':
 		#result = uploadoneframe(addr, "../testimgs/1.jpg")
 		#result = uploadoneframe(addr, "./postdata.py")
 		#print(result)
-		result = uploadoneframe(addr, imgfilepath)
-		print(gettimestr(),': uploaded')
-		print('result: ',result)
+		try:
+			result = uploadoneframe(addr, imgfilepath)
+		except Exception as e:
+			print(gettimestr(),': failed to upload')
+		else:
+			print(gettimestr(),': uploaded')
+			print('result: ',result)
 		time.sleep(timenext-time.time())
 
 
