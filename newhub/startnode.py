@@ -3,7 +3,10 @@
 
 from thread_uploaddata import uploaddata
 import serial, threading
+from timestamp import disptimestamp
+import time
 def startnode(nodeinfo):
+	time.sleep(nodeinfo['start_delay'])
 	#try:
 	#	ser = serial.Serial(nodeinfo['devname'],nodeinfo['baudrate'])
 	#except Exception as e:
@@ -15,9 +18,16 @@ def startnode(nodeinfo):
 	ser.flushInput()
 	#ingore bad line
 	data = ser.readline()
+	timegap = nodeinfo['gap']
 	while True:
+		time.sleep(timegap)
 		#now listen
 		try:
+			#flush input
+			ser.flushInput()
+			#ingore bad line
+			data = ser.readline()
+			#re_read
 			data = ser.readline()
 			data = data.decode('utf-8')
 		except Exception as e:
@@ -25,6 +35,8 @@ def startnode(nodeinfo):
 			print('node: {}'.format(nodeinfo['nodename']))
 			print('details:\n',e)
 			continue
+		disptimestamp()
+		print('node id: ', nodeinfo['id'],' :data received')
 		#start a new thread to upload data
 		t = threading.Thread(target=uploaddata,args=(data,nodeinfo))
 		t.start()

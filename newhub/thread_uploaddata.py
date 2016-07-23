@@ -14,6 +14,8 @@ def uploaddata(data, nodeinfo):
 	try:
 		postdata(nodeinfo['srvaddr'], nodeinfo['id'] , weight)
 	except Exception as e:
-		print("failed to post")
+		print("failed to post: ",e)
+	else:
+		print('node id: ', nodeinfo['id'],' :data posted')
 	finally:
 		return 0

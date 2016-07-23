@@ -22,7 +22,9 @@ def postdata (addr, id, weight):
 		if f.status >= 400:
 			raise ConnectionError('HTTP ERR: ', f.status)
 		res = f.read()
+		#print('!!!!!!!!!!!',res.decode('utf-8'))
 		resdict = json.loads(res.decode('utf-8'))
+		#resdict={}		
 		return resdict
 
 
@@ -35,7 +37,7 @@ if __name__ == '__main__':
 		res = postdata(post_serveraddr, sampleid, sampleweight)
 		print("returned :",res)
 	except Exception as e:
-		timestamp.disptimestamp() 
+		timestamp.disptimestamp()
 		print('  ERROR ! failed to post data! ')
 		print('  id:', sampleid, 'weight:', sampleweight)
 		print('  err info: ', e)
