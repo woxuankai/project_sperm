@@ -82,4 +82,7 @@ if __name__ == '__main__':
 		else:
 			print(gettimestr(),': uploaded')
 			print('result: ',result)
+		sleeptime = timenext-time.time()
+		if sleeptime < 0:
+			sleeptime = 0
 		time.sleep(timenext-time.time())
