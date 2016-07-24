@@ -22,8 +22,8 @@ if __name__ == '__main__':
 		stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
 		logfilepath = logfilepathtemplate.format('daemon',stimenow)
 		logfilepath = path2abolutepath(logfilepath)
-		#logfile_handler = logging.FileHandler(logfilepath)
-		logfile_handler = logging.StreamHandler()
+		logfile_handler = logging.FileHandler(logfilepath)
+		#logfile_handler = logging.StreamHandler()
 		formatter = logging.Formatter(\
 '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		logfile_handler.setFormatter(formatter)
@@ -60,8 +60,8 @@ if __name__ == '__main__':
 				stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
 				logfilepath = logfilepathtemplate.format(nodename,stimenow)
 				logfilepath = path2abolutepath(logfilepath)
-				#logfile_handler = logging.FileHandler(logfilepath)
-				logfile_handler = logging.StreamHandler()
+				logfile_handler = logging.FileHandler(logfilepath)
+				#logfile_handler = logging.StreamHandler()
 				logfile_handler.setFormatter(formatter)
 				nodelogger.addHandler(logfile_handler)
 			except Exception:
