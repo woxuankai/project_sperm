@@ -1,7 +1,0 @@
-{
-    "addr":"http://211.83.111.245/biaoben/img_receive.php",
-    "imgfilepath":"/tmp/img.jpg",
-    "timeinterval":600,
-    "videodevice":"/dev/video0",
-    "resolution":[640,480]
-}

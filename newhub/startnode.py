@@ -7,6 +7,7 @@ from timestamp import disptimestamp
 import time
 def startnode(nodeinfo):
 	time.sleep(nodeinfo['start_delay'])
+	#a = 2/0
 	#try:
 	#	ser = serial.Serial(nodeinfo['devname'],nodeinfo['baudrate'])
 	#except Exception as e:
@@ -42,8 +43,6 @@ def startnode(nodeinfo):
 		t.start()
 	#shouldn't come here if everything is ok
 	#return 0
-
-
 
 import time
 def startnodetest(nodeinfo):

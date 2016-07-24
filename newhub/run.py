@@ -2,50 +2,82 @@
 # -*- coding: utf-8 -*-
 
 configfilepath = './config.json'
+logfilepathtemplate = './logs/log_{}'
 
-import os, time
+failed_restart_delay = 60
+fork_delay = 10
+
+import os
+def path2abolutepath(path, base_dir=os.path.dirname(__file__)):
+	if path[0] != '/':
+		return os.path.join(base_dir, path)
+	else:
+		return path
+
+import time, logging
 from getnodes import getnodes
 from startnode import startnode, startnodetest
+
 if __name__ == '__main__':
-	print('program start!')
-	#get nodes info
+	logfile = logging.
+	logging.info('start!')
+	logging.info('...loading config file')
 	try:
-		if configfilepath[0] != '/':
-			BASE_DIR = os.path.dirname(__file__)
-			configfilepath = os.path.join(BASE_DIR, configfilepath)
-		nodes=getnodes(configfilepath);
-	except Exception as e:
-		print('fail to  parse file: ',configfilepath)
-		print('details: ',e)
+		configfilepath = path2abolutepath(configfilepath)
+		allnodes = getnodes(configfilepath);
+	except Exception:
+		logging.critical('fail to load config file: ' + configfilepath)
+		exit(-1)
 	#one node, one process
 	childpids = {};
-	while len(nodes) >= 1:
+	logging.info('...forking for node processes')
+	nodes = allnodes.copy()
+	while True:
 		nodename,nodeinfo = nodes.popitem()
-		pid = os.fork()
+		try:
+			pid = os.fork()
+		except Exception:
+			logging.critical('unable to fork')
+			exit(-1)
 		if pid == 0:
-			#child process
+			#the child process
+			logging.info("I'm process for node: {}".format(nodename))
 			try:
 				nodeinfo['nodename'] = nodename
 				startnode(nodeinfo)
 				#startnodetest(nodeinfo)
 			except Exception as e:
-				print('failed to start node: {}'.format(nodename))
-				print('details: ',e)
+				logging.error('exception occurs in node: {}'.format(nodename))
 				exit(-1)
 			#shouldn't reach here
-			exit(0)
+			logging.error('process for node: {} exits now'.format(nodename))
+			exit(-2)
 		else:
-			#parent process
-			childpids[pid]=nodename
-			time.sleep(0.5)
-			#continue to fork
+			#the parent process
+			logging.info('successfully forked for node: {}'.format(nodename))
+			childpids[pid] = nodename
+			if len(nodes) <= 0:
+				logging.info('all nodes have their own processs now')
+				#wait for processes exit and restart them
+				pid,status = os.wait()
+				exitchildname = childpids[pid]
+				nodes[exitchildname] = allnodes[exitchildname]
+				logging.error('process for node <{}> exited\
+\nexit status indication: {}\
+\nnode will restart soon'\
+.format(exitchildname,status))
+				time.sleep(failed_restart_delay)
+			else:
+				#wait for some time, then continue to fork
+				time.sleep(fork_delay)
+
 	#forked one process per node
 	#wait for every process to finish
-	while len(childpids) >= 1:
-		pid,status = os.wait()
-		exitchildname = childpids.pop(pid);
-		print('process for node <{}> exited'.format(exitchildname))
-		print('exit status indication: ',status)
+	#while len(childpids) >= 1:
+	#	pid,status = os.wait()
+	#	exitchildname = childpids.pop(pid);
+	#	print('process for node <{}> exited'.format(exitchildname))
+	#	print('exit status indication: ',status)
 	#child processes should never return
 	#thus program shouldn't come here
 	exit(0)

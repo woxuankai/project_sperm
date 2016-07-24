@@ -1,3 +1,9 @@
+##config_file
+config.json
+config_img.json
+##logs
+logs/
+
 ##for C/C++
 
 # Compiled Object files
