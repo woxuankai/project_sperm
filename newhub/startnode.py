@@ -1,11 +1,33 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from thread_uploaddata import uploaddata
+def parsedata(data):
+    return float(data[6:14].replace(' ',''))
+
+import logging
+from postdata import postdata
+def uploaddata(data, nodeinfo):
+	try:
+		weight = parsedata(data)
+	except Exception as e:
+		logger.error("error data format")
+		return 0
+	try:
+		postdata(nodeinfo['srvaddr'], nodeinfo['id'] , weight)
+	except Exception as e:
+		logger.error("failed to post: ",e)
+	else:
+		logger.info('node id: ', nodeinfo['id'],' :data posted')
+	finally:
+		return 0
+
 import serial, threading
 from timestamp import disptimestamp
 import time
+
 def startnode(nodeinfo):
+	logger = logging.getLogger(nodeinfo['nodename']+'_logger')
+	deamonlogger = 	logging.getLogger('deamon_logger')
 	time.sleep(nodeinfo['start_delay'])
 	#a = 2/0
 	#try:
@@ -32,12 +54,9 @@ def startnode(nodeinfo):
 			data = ser.readline()
 			data = data.decode('utf-8')
 		except Exception as e:
-			print('error occured while reading data from serial port')
-			print('node: {}'.format(nodeinfo['nodename']))
-			print('details:\n',e)
+			logger.error('error occured while reading data from serial port')
 			continue
-		disptimestamp()
-		print('node id: ', nodeinfo['id'],' :data received')
+		logger.info('node id: ', nodeinfo['id'],' :data received')
 		#start a new thread to upload data
 		t = threading.Thread(target=uploaddata,args=(data,nodeinfo))
 		t.start()
@@ -47,9 +66,19 @@ def startnode(nodeinfo):
 import time
 def startnodetest(nodeinfo):
 	data='	  5.6234				 '
-	#start a new thread to upload data
+	logger = logging.getLogger(nodeinfo['nodename']+'_logger')
+	deamonlogger = 	logging.getLogger('deamon_logger')
+	time.sleep(nodeinfo['start_delay'])
+	timegap = nodeinfo['gap']
 	while True:
+		time.sleep(timegap)
+		#now listen
+		try:
+			pass
+		except Exception as e:
+			logger.error('error occured while reading data from serial port')
+			continue
+		logger.info('node id: ', nodeinfo['id'],' :data received')
+		#start a new thread to upload data
 		t = threading.Thread(target=uploaddata,args=(data,nodeinfo))
 		t.start()
-		print("pretend received data")
-		time.sleep(1)

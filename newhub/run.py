@@ -2,69 +2,95 @@
 # -*- coding: utf-8 -*-
 
 configfilepath = './config.json'
-logfilepathtemplate = './logs/log_{}'
+logfilepathtemplate = './logs/log_{}_{}.log'
 
 failed_restart_delay = 60
 fork_delay = 10
 
-import os
-def path2abolutepath(path, base_dir=os.path.dirname(__file__)):
-	if path[0] != '/':
-		return os.path.join(base_dir, path)
-	else:
-		return path
 
-import time, logging
+
+import time, logging, os
 from getnodes import getnodes
 from startnode import startnode, startnodetest
+from path2absolute import path2abolutepath
 
 if __name__ == '__main__':
-	logfile = logging.
-	logging.info('start!')
-	logging.info('...loading config file')
+	#config log file
+	try:
+		logger = logging.getLogger('daemon_logger')
+		logger.setLevel(logging.DEBUG)
+		stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
+		logfilepath = logfilepathtemplate.format('daemon',stimenow)
+		logfilepath = path2abolutepath(logfilepath)
+		#logfile_handler = logging.FileHandler(logfilepath)
+		logfile_handler = logging.StreamHandler()
+		formatter = logging.Formatter(\
+'%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		logfile_handler.setFormatter(formatter)
+		logger.addHandler(logfile_handler)
+	except Exception:
+		logging.exception('failed to init logger')
+		exit(-1)
+	##start
+	logger.info('start!')
+	logger.info('...loading config file')
 	try:
 		configfilepath = path2abolutepath(configfilepath)
 		allnodes = getnodes(configfilepath);
 	except Exception:
-		logging.critical('fail to load config file: ' + configfilepath)
+		logger.exception('fail to load config file: ' + configfilepath)
 		exit(-1)
 	#one node, one process
 	childpids = {};
-	logging.info('...forking for node processes')
+	logger.info('...forking for node processes')
 	nodes = allnodes.copy()
 	while True:
 		nodename,nodeinfo = nodes.popitem()
 		try:
 			pid = os.fork()
 		except Exception:
-			logging.critical('unable to fork')
+			logger.exception('unable to fork')
 			exit(-1)
 		if pid == 0:
 			#the child process
-			logging.info("I'm process for node: {}".format(nodename))
+			##config log file
+			try:
+				nodelogger = logging.getLogger(nodename+'_logger')
+				nodelogger.setLevel(logging.DEBUG)
+				stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
+				logfilepath = logfilepathtemplate.format(nodename,stimenow)
+				logfilepath = path2abolutepath(logfilepath)
+				#logfile_handler = logging.FileHandler(logfilepath)
+				logfile_handler = logging.StreamHandler()
+				logfile_handler.setFormatter(formatter)
+				nodelogger.addHandler(logfile_handler)
+			except Exception:
+				logger.exception(\
+'failed to init logger for node {}'.format(nodename))
+				exit(-1)
+			nodelogger.info("I'm process for node: {}".format(nodename))
 			try:
 				nodeinfo['nodename'] = nodename
 				startnode(nodeinfo)
 				#startnodetest(nodeinfo)
 			except Exception as e:
-				logging.error('exception occurs in node: {}'.format(nodename))
+				nodelogger.exception('exception occurs in node <{}>'.format(nodename))
 				exit(-1)
 			#shouldn't reach here
-			logging.error('process for node: {} exits now'.format(nodename))
+			nodelogger.error('process for node <{}> exits now'.format(nodename))
 			exit(-2)
 		else:
 			#the parent process
-			logging.info('successfully forked for node: {}'.format(nodename))
+			logger.info('successfully forked for node <{}>'.format(nodename))
 			childpids[pid] = nodename
 			if len(nodes) <= 0:
-				logging.info('all nodes have their own processs now')
+				logger.info('all nodes have their own processs now')
 				#wait for processes exit and restart them
 				pid,status = os.wait()
 				exitchildname = childpids[pid]
 				nodes[exitchildname] = allnodes[exitchildname]
-				logging.error('process for node <{}> exited\
-\nexit status indication: {}\
-\nnode will restart soon'\
+				logger.error(\
+'process for node <{}> exited with status {}'\
 .format(exitchildname,status))
 				time.sleep(failed_restart_delay)
 			else:
