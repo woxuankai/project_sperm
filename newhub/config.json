@@ -1,16 +1,17 @@
 {
-	"settings":
+	"deamon":
 	{
 		"failed_restart_delay":60,
 		"fork_delay":10,
-		"start_delay":60
+		"start_delay":60,
+		"logpath":"./logs/log_deamon_{}.log"
 	},
 	"log2mail":
 	{
 		"from":"one_mail_addr@163.com",
 		"passwd":"1authcode",
 		"mail_list_logs":["woxuankai@gmail.com"],
-		"log_path":"./logs/"
+		"log_path":["./logs/"]
 	},
 	"nodes":
 	{
@@ -21,17 +22,19 @@
 			"devname":"/dev/ttyUSB0",
 			"baudrate":9600,
 			"srvaddr":"http://211.83.111.245/biaoben/receive.php",
-			"gap":10,
-			"start_delay":10
+			"interval":10,
+			"start_delay":10,
+			"logpath":"./logs/log_node_{}.log"
 		},
-		"camera1":
+		"camera0":
 		{
 			"handle":"postimg",
 			"addr":"http://211.83.111.245/biaoben/img_receive.php",
 			"imgfilepath":"/tmp/img.jpg",
-			"timeinterval":600,
+			"interval":600,
 			"videodevice":"/dev/video0",
-			"resolution":[1080,720]
+			"resolution":[1080,720],
+			"logpath":"./logs/log_camera1_{}.log"
 		}
 	}
 }

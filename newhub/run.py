@@ -17,13 +17,23 @@ def initlogger(loggername, logpath='./logs/log_{}_{}.log') :
 	logger.addHandler(logfile_handler)
 	return logger
 
-import time, logging, os, importlib
-from getnodes import getnodes
+import time, logging, os, importlib, sys
+import os.path
+from getconfig import getconfig
 from path2absolute import path2abolutepath
 if __name__ == '__main__':
-	
-	configfilepath = './config.json'
-
+	#slove path problems
+	if len(sys.argv) < 2
+		print("usage: run.py config_file_path")
+		return -1
+	try:
+		configfilepath = os.path.abspath(argv[1])
+		if not configfilepath.isfile():
+			raise NameError
+		basedir = os.path.dirname(configfilepath)
+	except Exception as e:
+		logging.exception("invalid path: ", e)
+		exit(-1)
 	#config log file
 	try:
 		logger = initlogger('daemon')
@@ -33,12 +43,12 @@ if __name__ == '__main__':
 	#load config file
 	logger.info('...loading config file')
 	try:
-		configfilepath = path2abolutepath(configfilepath)
-		allnodes = getnodes(configfilepath);
+		config = getnodes(configfilepath);
 	except Exception:
 		logger.exception('fail to load config file: ' + configfilepath)
 		exit(-1)
 	#one node, one process
+	allnodes = config
 	childpids = {};
 	nodes = allnodes.copy()
 	while True:
