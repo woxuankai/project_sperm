@@ -1,38 +1,36 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-configfilepath = './config.json'
-logfilepathtemplate = './logs/log_{}_{}.log'
-
-failed_restart_delay = 60
-fork_delay = 10
-
-
-
-import time, logging, os
-from getnodes import getnodes
-from startnode import startnode, startnodetest
+import time, logging
 from path2absolute import path2abolutepath
+def initlogger(loggername, logpath='./logs/log_{}_{}.log') :
+	logger = logging.getLogger(loggername)
+	logger.setLevel(logging.DEBUG)
+	stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
+	logfilepath = logfilepathtemplate.format(loggername,stimenow)
+	logfilepath = path2abolutepath(logfilepath)
+	logfile_handler = logging.FileHandler(logfilepath)
+	#logfile_handler = logging.StreamHandler()
+	formatter = logging.Formatter(\
+'%(asctime)s - %(levelname)s - %(name)s : %(message)s')
+	logfile_handler.setFormatter(formatter)
+	logger.addHandler(logfile_handler)
+	return logger
 
+import time, logging, os, importlib
+from getnodes import getnodes
+from path2absolute import path2abolutepath
 if __name__ == '__main__':
+	
+	configfilepath = './config.json'
+
 	#config log file
 	try:
-		logger = logging.getLogger('daemon_logger')
-		logger.setLevel(logging.DEBUG)
-		stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
-		logfilepath = logfilepathtemplate.format('daemon',stimenow)
-		logfilepath = path2abolutepath(logfilepath)
-		logfile_handler = logging.FileHandler(logfilepath)
-		#logfile_handler = logging.StreamHandler()
-		formatter = logging.Formatter(\
-'%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-		logfile_handler.setFormatter(formatter)
-		logger.addHandler(logfile_handler)
+		logger = initlogger('daemon')
 	except Exception:
 		logging.exception('failed to init logger')
 		exit(-1)
-	##start
-	logger.info('start!')
+	#load config file
 	logger.info('...loading config file')
 	try:
 		configfilepath = path2abolutepath(configfilepath)
@@ -42,10 +40,10 @@ if __name__ == '__main__':
 		exit(-1)
 	#one node, one process
 	childpids = {};
-	logger.info('...forking for node processes')
 	nodes = allnodes.copy()
 	while True:
 		nodename,nodeinfo = nodes.popitem()
+		logger.info('...forking for node processes')	
 		try:
 			pid = os.fork()
 		except Exception:

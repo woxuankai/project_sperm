@@ -1,21 +1,37 @@
 {
-	"node1":
+	"settings":
 	{
-		"handle":"startnode",
-		"id":1,
-		"devname":"/dev/ttyUSB0",
-		"baudrate":9600,
-		"srvaddr":"http://211.83.111.245/biaoben/receive.php",
-		"gap":10,
-		"start_delay":10
+		"failed_restart_delay":60,
+		"fork_delay":10,
+		"start_delay":60
 	},
-	"camera1":
+	"log2mail":
 	{
-		"handle":"postimg",
-		"addr":"http://211.83.111.245/biaoben/img_receive.php",
-		"imgfilepath":"/tmp/img.jpg",
-		"timeinterval":600,
-		"videodevice":"/dev/video0",
-		"resolution":[1080,720]
+		"from":"one_mail_addr@163.com",
+		"passwd":"1authcode",
+		"mail_list_logs":["woxuankai@gmail.com"],
+		"log_path":"./logs/"
+	},
+	"nodes":
+	{
+		"node1":
+		{
+			"handle":"startnode",
+			"id":1,
+			"devname":"/dev/ttyUSB0",
+			"baudrate":9600,
+			"srvaddr":"http://211.83.111.245/biaoben/receive.php",
+			"gap":10,
+			"start_delay":10
+		},
+		"camera1":
+		{
+			"handle":"postimg",
+			"addr":"http://211.83.111.245/biaoben/img_receive.php",
+			"imgfilepath":"/tmp/img.jpg",
+			"timeinterval":600,
+			"videodevice":"/dev/video0",
+			"resolution":[1080,720]
+		}
 	}
 }
