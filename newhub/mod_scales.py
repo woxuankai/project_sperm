@@ -10,12 +10,12 @@ def uploaddata(data, nodeinfo):
 	try:
 		weight = parsedata(data)
 	except Exception as e:
-		logger.error("error data format")
+		logger.exception("error data format")
 		return 0
 	try:
 		postdata(nodeinfo['srvaddr'], nodeinfo['id'] , weight)
 	except Exception as e:
-		logger.error("failed to post: ",e)
+		logger.exception("failed to post: ",e)
 	else:
 		logger.info('node id: ', nodeinfo['id'],' :data posted')
 	finally:
@@ -54,7 +54,7 @@ def startnode(nodeinfo):
 			data = ser.readline()
 			data = data.decode('utf-8')
 		except Exception as e:
-			logger.error('error occured while reading data from serial port')
+			logger.exception('error occured while reading data from serial port')
 			continue
 		logger.info('node id: ', nodeinfo['id'],' :data received')
 		#start a new thread to upload data
@@ -76,7 +76,7 @@ def startnodetest(nodeinfo):
 		try:
 			pass
 		except Exception as e:
-			logger.error('error occured while reading data from serial port')
+			logger.exception('error occured while reading data from serial port')
 			continue
 		logger.info('node id: ', nodeinfo['id'],' :data received')
 		#start a new thread to upload data

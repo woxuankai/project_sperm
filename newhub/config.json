@@ -1,0 +1,21 @@
+{
+	"node1":
+	{
+		"handle":"startnode",
+		"id":1,
+		"devname":"/dev/ttyUSB0",
+		"baudrate":9600,
+		"srvaddr":"http://211.83.111.245/biaoben/receive.php",
+		"gap":10,
+		"start_delay":10
+	},
+	"camera1":
+	{
+		"handle":"postimg",
+		"addr":"http://211.83.111.245/biaoben/img_receive.php",
+		"imgfilepath":"/tmp/img.jpg",
+		"timeinterval":600,
+		"videodevice":"/dev/video0",
+		"resolution":[1080,720]
+	}
+}

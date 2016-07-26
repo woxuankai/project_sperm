@@ -65,8 +65,7 @@ if __name__ == '__main__':
 				logfile_handler.setFormatter(formatter)
 				nodelogger.addHandler(logfile_handler)
 			except Exception:
-				logger.exception(\
-'failed to init logger for node {}'.format(nodename))
+				logger.exception('failed to init logger for {}'.format(nodename))
 				exit(-1)
 			nodelogger.info("I'm process for node: {}".format(nodename))
 			try:
@@ -74,14 +73,14 @@ if __name__ == '__main__':
 				startnode(nodeinfo)
 				#startnodetest(nodeinfo)
 			except Exception as e:
-				nodelogger.exception('exception occurs in node <{}>'.format(nodename))
+				nodelogger.exception('exception occurs in <{}>'.format(nodename))
 				exit(-1)
 			#shouldn't reach here
-			nodelogger.error('process for node <{}> exits now'.format(nodename))
+			nodelogger.error('process for <{}> exits now'.format(nodename))
 			exit(-2)
 		else:
 			#the parent process
-			logger.info('successfully forked for node <{}>'.format(nodename))
+			logger.info('forked for <{}>'.format(nodename))
 			childpids[pid] = nodename
 			if len(nodes) <= 0:
 				logger.info('all nodes have their own processs now')
@@ -90,7 +89,7 @@ if __name__ == '__main__':
 				exitchildname = childpids[pid]
 				nodes[exitchildname] = allnodes[exitchildname]
 				logger.error(\
-'process for node <{}> exited with status {}'\
+'process for <{}> exited with status {}'\
 .format(exitchildname,status))
 				time.sleep(failed_restart_delay)
 			else:
