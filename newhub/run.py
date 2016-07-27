@@ -17,22 +17,21 @@ def initlogger(loggername, logpath='./logs/log_{}_{}.log') :
 	logger.addHandler(logfile_handler)
 	return logger
 
-import time, logging, os, importlib, sys
-import os.path
+import time, logging, importlib, sys
+import os, os.path
 from getconfig import getconfig
 from path2absolute import path2abolutepath
 if __name__ == '__main__':
 	#slove path problems
-	if len(sys.argv) < 2
-		print("usage: run.py config_file_path")
-		return -1
 	try:
-		configfilepath = os.path.abspath(argv[1])
-		if not configfilepath.isfile():
+		if len(sys.argv) < 2:
+			raise NameError("need a config file")
+		configfilepath = os.path.abspath(sys.argv[1])
+		if not os.path.isfile(configfilepath):
 			raise NameError
 		basedir = os.path.dirname(configfilepath)
-	except Exception as e:
-		logging.exception("invalid path: ", e)
+	except Exception:
+		logging.exception("invalid config file path!")
 		exit(-1)
 	#config log file
 	try:
@@ -43,10 +42,12 @@ if __name__ == '__main__':
 	#load config file
 	logger.info('...loading config file')
 	try:
-		config = getnodes(configfilepath);
+		config = getconfig(configfilepath);
 	except Exception:
 		logger.exception('fail to load config file: ' + configfilepath)
 		exit(-1)
+	print("passed")
+	exit(0)
 	#one node, one process
 	allnodes = config
 	childpids = {};
