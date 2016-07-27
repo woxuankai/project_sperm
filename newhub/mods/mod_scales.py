@@ -1,6 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
+				nodelogger = logging.getLogger(nodename+'_logger')
+				nodelogger.setLevel(logging.DEBUG)
+				stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
+				logfilepath = logfilepathtemplate.format(nodename,stimenow)
+				logfilepath = path2abolutepath(logfilepath)
+				logfile_handler = logging.FileHandler(logfilepath)
+				#logfile_handler = logging.StreamHandler()
+				logfile_handler.setFormatter(formatter)
+				nodelogger.addHandler(logfile_handler)
+			except Exception:
+				logger.exception('failed to init logger for {}'.format(nodename))
+				exit(-1)
+			nodelogger.info("I'm process for node: {}".format(nodename))
+			try:
+				nodeinfo['nodename'] = nodename
+				startnode(nodeinfo)
+				#startnodetest(nodeinfo)
+
+
 def parsedata(data):
     return float(data[6:14].replace(' ',''))
 

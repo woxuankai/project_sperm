@@ -1,40 +1,41 @@
 {
-	"deamon":
+	"maillog":
 	{
-		"failed_restart_delay":60,
-		"fork_delay":10,
+		"type":"maillog",
 		"start_delay":60,
-		"logpath":"./logs/log_deamon_{}.log"
-	},
-	"log2mail":
-	{
+		"restart_delay":60,
+		"logpath":"/var/log/project_sperm/log_maillog_{}.log",	
+
 		"from":"one_mail_addr@163.com",
 		"passwd":"1authcode",
-		"mail_list_logs":["woxuankai@gmail.com"],
-		"log_path":["./logs/"]
+		"mail_list":["woxuankai@gmail.com"],
+		"logs2update":["/var/log/project_sperm/logs/"]
 	},
-	"nodes":
+	"scales1":
 	{
-		"node1":
-		{
-			"handle":"startnode",
-			"id":1,
-			"devname":"/dev/ttyUSB0",
-			"baudrate":9600,
-			"srvaddr":"http://211.83.111.245/biaoben/receive.php",
-			"interval":10,
-			"start_delay":10,
-			"logpath":"./logs/log_node_{}.log"
-		},
-		"camera0":
-		{
-			"handle":"postimg",
-			"addr":"http://211.83.111.245/biaoben/img_receive.php",
-			"imgfilepath":"/tmp/img.jpg",
-			"interval":600,
-			"videodevice":"/dev/video0",
-			"resolution":[1080,720],
-			"logpath":"./logs/log_camera1_{}.log"
-		}
+		"type":"scales",
+		"start_delay":60,
+		"restart_delay":60,
+		"logpath":"/var/log/project_sperm/log_scales1_{}.log",
+
+		"devname":"/dev/ttyUSB0",
+		"baudrate":9600,
+		"id":1,
+		"srvaddr":"http://211.83.111.245/biaoben/receive.php",
+		"interval":10
+	},
+	"cam0":
+	{
+		"type":"cam",
+		"start_delay":60,
+		"restart_delay":60,
+		"logpath":"/var/log/project_sperm/log_cam0_{}.log",
+
+		"addr":"http://211.83.111.245/biaoben/img_receive.php",
+		"imgfilepath":"/tmp/img_cam0.jpg",
+		"interval":600,
+		"videodevice":"/dev/video0",
+		"resolution":[1080,720]
 	}
 }
+

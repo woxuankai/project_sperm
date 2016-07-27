@@ -1,117 +1,53 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import time, logging
-from path2absolute import path2abolutepath
-def initlogger(loggername, logpath='./logs/log_{}_{}.log') :
-	logger = logging.getLogger(loggername)
-	logger.setLevel(logging.DEBUG)
-	stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
-	logfilepath = logfilepathtemplate.format(loggername,stimenow)
-	logfilepath = path2abolutepath(logfilepath)
-	logfile_handler = logging.FileHandler(logfilepath)
-	#logfile_handler = logging.StreamHandler()
-	formatter = logging.Formatter(\
-'%(asctime)s - %(levelname)s - %(name)s : %(message)s')
-	logfile_handler.setFormatter(formatter)
-	logger.addHandler(logfile_handler)
-	return logger
-
-import time, logging, importlib, sys
+import logging, sys
 import os, os.path
 from getconfig import getconfig
-from path2absolute import path2abolutepath
+from daemon import daemon_start
 if __name__ == '__main__':
 	#slove path problems
+	logging.basicConfig(level=logging.DEBUG)
 	try:
-		if len(sys.argv) < 2:
-			raise NameError("need a config file")
+		if len(sys.argv) < 4:
+			raise NameError("not enough arguments")
 		configfilepath = os.path.abspath(sys.argv[1])
+		node2start = sys.argv[2]
 		if not os.path.isfile(configfilepath):
-			raise NameError
+			raise NameError("not a config file")
 		basedir = os.path.dirname(configfilepath)
 	except Exception:
-		logging.exception("invalid config file path!")
-		exit(-1)
-	#config log file
-	try:
-		logger = initlogger('daemon')
-	except Exception:
-		logging.exception('failed to init logger')
+		logging.exception("usage: run.py config nodename|all start|stop")
 		exit(-1)
 	#load config file
-	logger.info('...loading config file')
 	try:
-		config = getconfig(configfilepath);
+		config = getconfig(configfilepath)
 	except Exception:
-		logger.exception('fail to load config file: ' + configfilepath)
+		logging.exception('fail to load config file: ' + configfilepath)
 		exit(-1)
-	print("passed")
-	exit(0)
-	#one node, one process
-	allnodes = config
-	childpids = {};
-	nodes = allnodes.copy()
-	while True:
-		nodename,nodeinfo = nodes.popitem()
-		logger.info('...forking for node processes')	
-		try:
-			pid = os.fork()
-		except Exception:
-			logger.exception('unable to fork')
-			exit(-1)
-		if pid == 0:
-			#the child process
-			##config log file
+	#check configs
+	if node2start == 'all':
+		for nodename in config:
+			nodeconfig = config[nodename]
+			nodeconfig['nodename'] = nodename
 			try:
-				nodelogger = logging.getLogger(nodename+'_logger')
-				nodelogger.setLevel(logging.DEBUG)
-				stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
-				logfilepath = logfilepathtemplate.format(nodename,stimenow)
-				logfilepath = path2abolutepath(logfilepath)
-				logfile_handler = logging.FileHandler(logfilepath)
-				#logfile_handler = logging.StreamHandler()
-				logfile_handler.setFormatter(formatter)
-				nodelogger.addHandler(logfile_handler)
+				daemon_start(nodeconfig)
 			except Exception:
-				logger.exception('failed to init logger for {}'.format(nodename))
-				exit(-1)
-			nodelogger.info("I'm process for node: {}".format(nodename))
-			try:
-				nodeinfo['nodename'] = nodename
-				startnode(nodeinfo)
-				#startnodetest(nodeinfo)
-			except Exception as e:
-				nodelogger.exception('exception occurs in <{}>'.format(nodename))
-				exit(-1)
-			#shouldn't reach here
-			nodelogger.error('process for <{}> exits now'.format(nodename))
-			exit(-2)
-		else:
-			#the parent process
-			logger.info('forked for <{}>'.format(nodename))
-			childpids[pid] = nodename
-			if len(nodes) <= 0:
-				logger.info('all nodes have their own processs now')
-				#wait for processes exit and restart them
-				pid,status = os.wait()
-				exitchildname = childpids[pid]
-				nodes[exitchildname] = allnodes[exitchildname]
-				logger.error(\
-'process for <{}> exited with status {}'\
-.format(exitchildname,status))
-				time.sleep(failed_restart_delay)
+				logging.exception(\
+'failed to start node daemon<{}>'.format(nodename))
 			else:
-				#wait for some time, then continue to fork
-				time.sleep(fork_delay)
-
-	#forked one process per node
-	#wait for every process to finish
-	#while len(childpids) >= 1:
-	#	pid,status = os.wait()
-	#	exitchildname = childpids.pop(pid);
-	#	print('process for node <{}> exited'.format(exitchildname))
-	#	print('exit status indication: ',status)
-	#child processes should never return
-	#thus program shouldn't come here
+				logging.info('node daemon {} started'.format(nodename))
+	elif node2start in config:
+		nodeconfig = config[node2start]
+		nodeconfig['nodename'] = nodename
+		try:
+			daemon_start(nodeconfig)
+		except Exception:
+			logging.exception(\
+'failed to start node daemon<{}>'.format(nodename))
+		else:
+			logging.info('node daemon {} started'.format(nodename))
+	else:
+		logging.error('no such nodename'+node2start)
+		exit(-1)
 	exit(0)
