@@ -1,10 +1,14 @@
 {
 	"maillog":
 	{
-		"type":"maillog",
+		"nodetype":"maillog",
 		"start_delay":60,
 		"restart_delay":60,
-		"logpath":"/var/log/project_sperm/log_maillog_{}.log",	
+		"logpath":"/var/log/project_sperm/log_maillog_{}.log",
+		"logsuffixformat":"%Y_%m_%d_%X_%z",
+		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
+		"pidfile":"/temp/project_sperm_maillog.pid",
+		"dpidfile":"/temp/project_sperm_maillogd.pid",
 
 		"from":"one_mail_addr@163.com",
 		"passwd":"1authcode",
@@ -13,10 +17,14 @@
 	},
 	"scales1":
 	{
-		"type":"scales",
+		"nodetype":"scales",
 		"start_delay":60,
 		"restart_delay":60,
 		"logpath":"/var/log/project_sperm/log_scales1_{}.log",
+		"logsuffixformat":"%Y_%m_%d_%X_%z",
+		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
+		"pidfile":"/temp/project_sperm_scales1.pid",
+		"dpidfile":"/temp/project_sperm_scales1d.pid",
 
 		"devname":"/dev/ttyUSB0",
 		"baudrate":9600,
@@ -26,10 +34,14 @@
 	},
 	"cam0":
 	{
-		"type":"cam",
+		"nodetype":"cam",
 		"start_delay":60,
 		"restart_delay":60,
 		"logpath":"/var/log/project_sperm/log_cam0_{}.log",
+		"logsuffixformat":"%Y_%m_%d_%X_%z",
+		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
+		"pidfile":"/temp/project_sperm_cam0.pid",
+		"dpidfile":"/temp/project_sperm_cam0d.pid",
 
 		"addr":"http://211.83.111.245/biaoben/img_receive.php",
 		"imgfilepath":"/tmp/img_cam0.jpg",

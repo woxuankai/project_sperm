@@ -16,6 +16,9 @@ if __name__ == '__main__':
 		if not os.path.isfile(configfilepath):
 			raise NameError("not a config file")
 		basedir = os.path.dirname(configfilepath)
+		modpath = os.path.join(basedir,"./mods")
+		assert(os.path.isdir(modpath))
+		sys.path.append(modpath)
 	except Exception:
 		logging.exception("usage: run.py config nodename|all start|stop")
 		exit(-1)
