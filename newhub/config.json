@@ -9,6 +9,9 @@
 		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
 		"pidfile":"/temp/project_sperm_maillog.pid",
 		"dpidfile":"/temp/project_sperm_maillogd.pid",
+		"stdout":"/dev/null",
+		"stdin":"/dev/null",
+		"stderr":"/dev/null",
 
 		"from":"one_mail_addr@163.com",
 		"passwd":"1authcode",

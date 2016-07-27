@@ -8,7 +8,7 @@
 
 
 
-import os, os.path, importlib, logging, time
+import os, os.path, importlib, logging, time, sys, atexit
 #non-blocck, returns daemon pid
 def daemon_start(nodeconfig):
 	#assert common config
@@ -23,6 +23,10 @@ def daemon_start(nodeconfig):
 	logformat = nodeconfig['nodeformat']
 	pidfile = nodeconfig['pidfile']
 	dpidfile = nodeconfig['dpidfile']
+	stdin = nodeconfig['sdtin']
+	stdout = nodeconfig['sdtout']
+	stderr = nodeconfig['sdterr']
+
 	#set log system
 	logger = logging.getLogger(nodename)
 	logger.setLevel(logging.INFO)
@@ -37,53 +41,27 @@ def daemon_start(nodeconfig):
 	#able to record logs now
 	pid = os.fork()
 	if pid != 0:
-		#the parent process
+		#the parent(run) process
 		return pid
 	#the child(daemon) process
 	#daemonize process
-
-
-
-
-
-try:
-                        pid = os.fork()
-                        if pid > 0:
-                                # exit first parent
-                                sys.exit(0)
-                except OSError, e:
-                        sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
-                        sys.exit(1)
-       
-                # decouple from parent environment
-                os.chdir("/")
-                os.setsid()
-                os.umask(0)
-       
-                # do second fork
-                try:
-                        pid = os.fork()
-                        if pid > 0:
-                                # exit from second parent
-                                sys.exit(0)
-                except OSError, e:
-                        sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
-                        sys.exit(1)
-       
-                # redirect standard file descriptors
-                sys.stdout.flush()
-                sys.stderr.flush()
-                si = file(self.stdin, 'r')
-                so = file(self.stdout, 'a+')
-                se = file(self.stderr, 'a+', 0)
-                os.dup2(si.fileno(), sys.stdin.fileno())
-                os.dup2(so.fileno(), sys.stdout.fileno())
-                os.dup2(se.fileno(), sys.stderr.fileno())
-       
-                # write pidfile
-                atexit.register(self.delpid)
-                pid = str(os.getpid())
-                file(self.pidfile,'w+').write("%s\n" % pid)
+	## decouple from parent environment
+	os.chdir("/")
+	os.setsid()
+	os.umask(0)
+	## redirect standard file descriptors
+	sys.stdout.flush()
+	sys.stderr.flush()
+	si = file(stdin, 'r')
+	so = file(stdout, 'a+')
+	se = file(self.stderr, 'a+', 0)
+	os.dup2(si.fileno(), sys.stdin.fileno())
+	os.dup2(so.fileno(), sys.stdout.fileno())
+	os.dup2(se.fileno(), sys.stderr.fileno())
+	#write ppidfile
+	#atexit.register(self.delpid)
+	#pid = str(os.getpid())
+	#file(pidfile,'w+').write("%s\n" % pid)
 
 
 
