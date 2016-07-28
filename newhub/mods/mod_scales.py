@@ -42,7 +42,7 @@ def run(nodeinfo, logger):
 			data = data.decode('utf-8')
 		except Exception as e:
 			logger.exception('failed to read data from serial port')
-			continue
+			exit(1)
 		logger.info('#{} data received'.format(num))
 		#parse data
 		try:
