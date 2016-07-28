@@ -1,71 +1,38 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-				nodelogger = logging.getLogger(nodename+'_logger')
-				nodelogger.setLevel(logging.DEBUG)
-				stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
-				logfilepath = logfilepathtemplate.format(nodename,stimenow)
-				logfilepath = path2abolutepath(logfilepath)
-				logfile_handler = logging.FileHandler(logfilepath)
-				#logfile_handler = logging.StreamHandler()
-				logfile_handler.setFormatter(formatter)
-				nodelogger.addHandler(logfile_handler)
-			except Exception:
-				logger.exception('failed to init logger for {}'.format(nodename))
-				exit(-1)
-			nodelogger.info("I'm process for node: {}".format(nodename))
-			try:
-				nodeinfo['nodename'] = nodename
-				startnode(nodeinfo)
-				#startnodetest(nodeinfo)
-
-
 def parsedata(data):
     return float(data[6:14].replace(' ',''))
 
-import logging
+import logging, os, time
 from postdata import postdata
-def uploaddata(data, nodeinfo):
-	try:
-		weight = parsedata(data)
-	except Exception as e:
-		logger.exception("error data format")
-		return 0
-	try:
-		postdata(nodeinfo['srvaddr'], nodeinfo['id'] , weight)
-	except Exception as e:
-		logger.exception("failed to post: ",e)
-	else:
-		logger.info('node id: ', nodeinfo['id'],' :data posted')
-	finally:
-		return 0
+import serial
 
-import serial, threading
-from timestamp import disptimestamp
-import time
-
-def startnode(nodeinfo):
-	logger = logging.getLogger(nodeinfo['nodename']+'_logger')
-	deamonlogger = 	logging.getLogger('deamon_logger')
-	time.sleep(nodeinfo['start_delay'])
-	#a = 2/0
-	#try:
-	#	ser = serial.Serial(nodeinfo['devname'],nodeinfo['baudrate'])
-	#except Exception as e:
-	#	print('failed to open serial port!')
-	#	raise e
-	ser = serial.Serial(nodeinfo['devname'],nodeinfo['baudrate'])
-	#successfully opened serial port, start to listen and report
-	#flush input
-	ser.flushInput()
-	#ingore bad line
-	data = ser.readline()
-	timegap = nodeinfo['gap']
+def run(nodeinfo, logger):
+	logger.info('hello, this is a scales mod')
+	#	opened serial port and test
+	try:
+		ser = serial.Serial(nodeinfo['devname'],nodeinfo['baudrate'])
+		#	flush input
+		ser.flushInput()
+		#	ingore bad line
+		#ser.readline()
+	except:
+		logger.exception('failed to open or init serial port')
+		exit(1)
+	try:
+		timeinterval = nodeinfo['interval']
+		srvaddr = nodeinfo['srvaddr']
+		scalesid = nodeinfo['scalesid']
+	except:
+		logger.exception('missing config para')
+		exit(1)
+	num = 0
 	while True:
-		time.sleep(timegap)
-		#now listen
+		num = num + 1
+		#listen and grab data
 		try:
+			time.sleep(timeinterval)
 			#flush input
 			ser.flushInput()
 			#ingore bad line
@@ -74,31 +41,43 @@ def startnode(nodeinfo):
 			data = ser.readline()
 			data = data.decode('utf-8')
 		except Exception as e:
-			logger.exception('error occured while reading data from serial port')
+			logger.exception('failed to read data from serial port')
 			continue
-		logger.info('node id: ', nodeinfo['id'],' :data received')
-		#start a new thread to upload data
-		t = threading.Thread(target=uploaddata,args=(data,nodeinfo))
-		t.start()
-	#shouldn't come here if everything is ok
-	#return 0
-
-import time
-def startnodetest(nodeinfo):
-	data='	  5.6234				 '
-	logger = logging.getLogger(nodeinfo['nodename']+'_logger')
-	deamonlogger = 	logging.getLogger('deamon_logger')
-	time.sleep(nodeinfo['start_delay'])
-	timegap = nodeinfo['gap']
-	while True:
-		time.sleep(timegap)
-		#now listen
+		logger.info('#{} data received'.format(num))
+		#parse data
 		try:
-			pass
+			weight = parsedata(data)
 		except Exception as e:
-			logger.exception('error occured while reading data from serial port')
+			logger.exception('failed to parse data')
 			continue
-		logger.info('node id: ', nodeinfo['id'],' :data received')
-		#start a new thread to upload data
-		t = threading.Thread(target=uploaddata,args=(data,nodeinfo))
-		t.start()
+		#fork a new thread to post data
+		try:
+			pid = os.fork()
+		except:
+			logger.exception('failed to first fork')
+		if pid == 0:
+			#	the child process/the second parent process
+			#	do #2 fork
+			try:
+				pid = os.fork()
+			except:
+				logger.exception('failed to do #2 fork')
+				exit(1)#no one cares exit code here
+			if pid == 0:
+				#the second child process
+				try:
+					postdata(srvaddr, scalesid, weight)
+				except:
+					logger.exception('#{} failed to post'.format(num))
+					exit(1)
+				logger.info('#{} data posted'.format(num))
+				exit(0)
+			#	the second parent process
+			exit(0)
+		#	the parent process
+		##	wait for the second parent process exit
+		os.wait()
+	#end while
+	#shouldn't come here if everything is ok
+	logger.error('unexcept error: fun run in mod scales should not return')
+	return 0

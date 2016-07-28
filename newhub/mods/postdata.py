@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import timestamp
 from urllib import request, parse
 import json
 import time
@@ -24,7 +23,7 @@ def postdata (addr, id, weight):
 		res = f.read()
 		#print('!!!!!!!!!!!',res.decode('utf-8'))
 		resdict = json.loads(res.decode('utf-8'))
-		#resdict={}		
+		#resdict={}
 		return resdict
 
 
@@ -37,7 +36,6 @@ if __name__ == '__main__':
 		res = postdata(post_serveraddr, sampleid, sampleweight)
 		print("returned :",res)
 	except Exception as e:
-		timestamp.disptimestamp()
 		print('  ERROR ! failed to post data! ')
 		print('  id:', sampleid, 'weight:', sampleweight)
 		print('  err info: ', e)

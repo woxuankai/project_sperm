@@ -22,9 +22,9 @@
 	"scales1":
 	{
 		"nodetype":"scales",
-		"start_delay":60,
-		"restart_delay":60,
-		"max_retry":-1,
+		"start_delay":6,
+		"restart_delay":6,
+		"max_retry":5,
 		"logpath":"/var/log/project_sperm/log_scales1_{}.log",
 		"logsuffixformat":"%Y_%m_%d_%X_%z",
 		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
@@ -36,7 +36,7 @@
 
 		"devname":"/dev/ttyUSB0",
 		"baudrate":9600,
-		"id":1,
+		"scalesid":1,
 		"srvaddr":"http://211.83.111.245/biaoben/receive.php",
 		"interval":10
 	},
@@ -76,7 +76,7 @@
 		"stdin":"/dev/null",
 		"stderr":"/dev/null",
 
-		"exitcode":-1
+		"exitcode":0
 	}
 }
 

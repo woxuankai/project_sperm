@@ -18,8 +18,8 @@ def daemon_start(nodeconfig):
 	logpath = nodeconfig.pop('logpath')
 	logsuffixformat = nodeconfig.pop('logsuffixformat')
 	logformat = nodeconfig.pop('logformat')
-	pidfile = nodeconfig['pidfile']
-	dpidfile = nodeconfig['dpidfile']
+	pidfile = nodeconfig.pop('pidfile')
+	dpidfile = nodeconfig.pop('dpidfile')
 	stdin = nodeconfig.pop('stdin')
 	stdout = nodeconfig.pop('stdout')
 	stderr = nodeconfig.pop('stderr')
