@@ -53,6 +53,7 @@ def daemon_start(nodeconfig):
 	except :
 		logger.exception('failed to decouple from parent environment')
 		exit(1)
+	logger.info('decoupled from parent environment')
 	##	second fork
 	try:
 		pid = os.fork()
@@ -62,6 +63,7 @@ def daemon_start(nodeconfig):
 	if pid != 0:
 		###	the second parent process
 		exit(0)
+	logger.info('deamon process forked')
 	##	redirect standard file descriptors
 	try:
 		sys.stdout.flush()
@@ -75,6 +77,7 @@ def daemon_start(nodeconfig):
 	except :
 		logger.exception('failed to redirect standard file descriptors')
 		exit(1)
+	logger.info('deamonized')
 	##	write ppidfile
 	#atexit.register(self.delpid)
 	#pid = str(os.getpid())
@@ -86,11 +89,13 @@ def daemon_start(nodeconfig):
 	except :
 		logger.exception('failed to load mod to run node')
 		exit(1)
+	logger.info('loaded function handler')
 	#	wait a moment
 	try:
 		time.sleep(start_delay)
 	except :
 		logger.exception('failed to do start delay')
+	logger.info('now fork for work process')
 	#	fork for work process
 	if max_retry >= 0:
 		max_retry = max_retry + 1
