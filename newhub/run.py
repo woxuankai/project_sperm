@@ -21,13 +21,13 @@ if __name__ == '__main__':
 		sys.path.append(modpath)
 	except Exception:
 		logging.exception("usage: run.py config nodename|all start|stop")
-		exit(-1)
+		exit(1)
 	#load config file
 	try:
 		config = getconfig(configfilepath)
 	except Exception:
 		logging.exception('fail to load config file: ' + configfilepath)
-		exit(-1)
+		exit(1)
 	#check configs
 	if node2start == 'all':
 		for nodename in config:
@@ -42,6 +42,7 @@ if __name__ == '__main__':
 				logging.info('node daemon {} started'.format(nodename))
 	elif node2start in config:
 		nodeconfig = config[node2start]
+		nodename = node2start
 		nodeconfig['nodename'] = nodename
 		try:
 			daemon_start(nodeconfig)
@@ -51,6 +52,6 @@ if __name__ == '__main__':
 		else:
 			logging.info('node daemon {} started'.format(nodename))
 	else:
-		logging.error('no such nodename'+node2start)
-		exit(-1)
+		logging.error('no such nodename '+node2start)
+		exit(1)
 	exit(0)

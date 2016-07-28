@@ -3,31 +3,28 @@
 
 
 
-
-
-
-
-
 import os, os.path, importlib, logging, time, sys, atexit
 #non-blocck, returns daemon pid
 def daemon_start(nodeconfig):
-	#assert common config
-	nodename = nodeconfig['nodename']
-	nodetype = nodeconfig['nodetype']
-	start_delay = nodeconfig['start_delay']
-	restart_delay = nodeconfig['restart_delay']
+	#	assert common config
+	nodename = nodeconfig.pop('nodename')
+	nodetype = nodeconfig.pop('nodetype')
+	start_delay = nodeconfig.pop('start_delay')
+	restart_delay = nodeconfig.pop('restart_delay')
+	max_retry = nodeconfig.pop('max_retry')
 	assert(start_delay >= 0)
 	assert(restart_delay >= 0)
-	logpath = nodeconfig['logpath']
-	logsuffixformat = nodeconfig['logsuffixformat']
-	logformat = nodeconfig['nodeformat']
+	assert(type(max_retry) == int)
+	logpath = nodeconfig.pop('logpath')
+	logsuffixformat = nodeconfig.pop('logsuffixformat')
+	logformat = nodeconfig.pop('logformat')
 	pidfile = nodeconfig['pidfile']
 	dpidfile = nodeconfig['dpidfile']
-	stdin = nodeconfig['sdtin']
-	stdout = nodeconfig['sdtout']
-	stderr = nodeconfig['sdterr']
+	stdin = nodeconfig.pop('stdin')
+	stdout = nodeconfig.pop('stdout')
+	stderr = nodeconfig.pop('stderr')
 
-	#set log system
+	#	set log system
 	logger = logging.getLogger(nodename)
 	logger.setLevel(logging.INFO)
 	stimenow = time.strftime(logsuffixformat, time.localtime())
@@ -38,158 +35,92 @@ def daemon_start(nodeconfig):
 	logfile_handler.setFormatter(formatter)
 	logger.addHandler(logfile_handler)
 	logger.info('logger init finished')
-	#able to record logs now
+	#	able to record logs now
+	#	first fork
+	##	does not handle error, which will be handled by parent process
 	pid = os.fork()
 	if pid != 0:
-		#the parent(run) process
+		#	the parent(run) process
 		return pid
-	#the child(daemon) process
-	#daemonize process
-	## decouple from parent environment
-	os.chdir("/")
-	os.setsid()
-	os.umask(0)
-	## redirect standard file descriptors
-	sys.stdout.flush()
-	sys.stderr.flush()
-	si = file(stdin, 'r')
-	so = file(stdout, 'a+')
-	se = file(self.stderr, 'a+', 0)
-	os.dup2(si.fileno(), sys.stdin.fileno())
-	os.dup2(so.fileno(), sys.stdout.fileno())
-	os.dup2(se.fileno(), sys.stderr.fileno())
-	#write ppidfile
+	#	the child(daemon) process
+	###	have to record and handle errors oneself
+	##	daemonize process
+	##	decouple from parent environment
+	try:
+		os.chdir("/tmp")
+		os.setsid()
+		os.umask(0)
+	except :
+		logger.exception('failed to decouple from parent environment')
+		exit(1)
+	##	second fork
+	try:
+		pid = os.fork()
+	except :
+		logger.exception('failed to do second fork')
+		exit(1)
+	if pid != 0:
+		###	the second parent process
+		exit(0)
+	##	redirect standard file descriptors
+	try:
+		sys.stdout.flush()
+		sys.stderr.flush()
+		si = open(stdin, 'r')
+		so = open(stdout, 'a+')
+		se = open(stderr, 'a+')
+		os.dup2(si.fileno(), sys.stdin.fileno())
+		os.dup2(so.fileno(), sys.stdout.fileno())
+		os.dup2(se.fileno(), sys.stderr.fileno())
+	except :
+		logger.exception('failed to redirect standard file descriptors')
+		exit(1)
+	##	write ppidfile
 	#atexit.register(self.delpid)
 	#pid = str(os.getpid())
 	#file(pidfile,'w+').write("%s\n" % pid)
-
-
-
-
-
-	#import mod and handler function
-	mod = importlib.import_module("mod_"+nodetype)
-	handler_run = getattr(mod, "run")
-	print(nodeconfig)
-	return 123
-
-
-import time, logging
-def initlogger(loggername, logpath):
-	logger = logging.getLogger(loggername)
-	logger.setLevel(logging.DEBUG)
-	stimenow = time.strftime('%Y_%m_%d_%X_%z', time.localtime())
-	logfilepath = logpath.format(stimenow)
-	logfile_handler = logging.FileHandler(logfilepath)
-	#logfile_handler = logging.StreamHandler()
-	formatter = logging.Formatter(\
-'%(asctime)s - %(levelname)s - %(name)s : %(message)s')
-	logfile_handler.setFormatter(formatter)
-	logger.addHandler(logfile_handler)
-	return logger
-
-import time, logging, importlib, sys
-import os, os.path
-from getconfig import getconfig
-if __name__ == '__main__':
-	#slove path problems
+	#	import mod and handler function
 	try:
-		if len(sys.argv) < 2:
-			raise NameError("need a config file")
-		configfilepath = os.path.abspath(sys.argv[1])
-		if not os.path.isfile(configfilepath):
-			raise NameError
-		basedir = os.path.dirname(configfilepath)
-	except Exception:
-		logging.exception("invalid config file path!")
-		exit(-1)
-	#load config file
+		mod = importlib.import_module("mod_"+nodetype)
+		handler_run = getattr(mod, "run")
+	except :
+		logger.exception('failed to load mod to run node')
+		exit(1)
+	#	wait a moment
 	try:
-		config = getconfig(configfilepath);
-	except Exception:
-		logging.exception('fail to load config file: ' + configfilepath)
-		exit(-1)
-	#check deamon config
-	try:
-		deamonconfig = config["deamon"]
-		failed_restart_delay = deamonconfig["failed_restart_delay"]
-		assert(failed_restart_delay >= 0)
-		fork_delay = deamonconfig["fork_delay"]
-		assert(fork_delay >= 0)
-		start_delay = deamonconfig["start_delay"]
-		assert(start_delay >= 0)
-		logpath = deamonconfig["logpath"]
-		logpath = os.path.join(basedir, logpath)
-	except Exception:
-		logging.exception("failed deamon config check")
-		exit(-1)
-	#start_delay
-	time.sleep(start_delay)
-	#init log system
-	try:
-		logger = initlogger('daemon',logpath)
-	except Exception:
-		logging.exception('failed to init daemon logger')
-		exit(-1)
-	#basedir, config, logger prepared now
-	logger.info('deamon init done')
-	#parse nodes
-	try:
-		allnodes = config['nodes']
-	except Exception:
-		logging.exception('no "nodes" area in config file')
-		exit(-1)
-	nodes_wait = allnodes.copy()#contains nodename:nodeconfig
-	nodes_ready = {}#contains pid:names
-	#one node, one process
-	while True:
-		for nodename in nodes_wait:
-			time.sleep()
-			logger.info('...forking for node <{}>'.format(nodename))
-			try:
-				pid = os.fork()
-			except Exception:
-				logger.exception('unable to fork')
-			continue
-			if pid == 0:
-				#the child process
-				try:
-					nodeinfo["name"] = nodename
-					nodeinfo["basedir"] = basedir
-					startnode(nodeinfo)
-				except Exception as e:
-					nodelogger.exception('exception occurs in <{}>'.format(nodename))
-					exit(-1)
-			#shouldn't reach here
-			nodelogger.error('process for <{}> exits now'.format(nodename))
-			exit(-2)
-		else:
-			#the parent process
-			logger.info('forked for <{}>'.format(nodename))
-			childpids[pid] = nodename
-			if len(nodes) <= 0:
-				#every node has its process
-				logger.info('all nodes have their own processs now')
-				#wait for processes exit and restart them
-				pid,status = os.wait()
-				status = status/255
-				exitchildname = childpids[pid]
-				nodes[exitchildname] = allnodes[exitchildname]
-				logger.error(\
-'process for <{}> exited with status {}'\
-.format(exitchildname,status))
-				time.sleep(failed_restart_delay)
-			else:
-				#wait for some time, then continue to fork
-				time.sleep(fork_delay)
-
-	#forked one process per node
-	#wait for every process to finish
-	#while len(childpids) >= 1:
-	#	pid,status = os.wait()
-	#	exitchildname = childpids.pop(pid);
-	#	print('process for node <{}> exited'.format(exitchildname))
-	#	print('exit status indication: ',status)
-	#child processes should never return
-	#thus program shouldn't come here
+		time.sleep(start_delay)
+	except :
+		logger.exception('failed to do start delay')
+	#	fork for work process
+	if max_retry >= 0:
+		max_retry = max_retry + 1
+	while max_retry != 0:
+		if max_retry > 0:
+			max_retry = max_retry - 1
+		try:
+			pid = os.fork()
+		except :
+			logger.exception('failed to fork')
+		if pid == 0:
+			#	the child process
+			handler_run(nodeconfig,logger)
+			logger.info('work func return')
+			exit(0)
+		#	parent process
+		# successfully forked
+		logger.info('forked for node')
+		#wait
+		pid, status = os.wait()
+		exitcode = int(status>>8)
+		logger.info('work process exited with {}'.format(exitcode))
+		if exitcode == 0:
+			break
+		logger.info('wait and restart worker: {} left'.format(max_retry))
+		try:
+			time.sleep(restart_delay)
+		except:
+			logger.exception('failed to do restart delay')
+			exit(1)
+	## out of the loop
+	logger.info('exit daemon process now')
 	exit(0)
