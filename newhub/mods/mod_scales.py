@@ -81,3 +81,6 @@ def run(nodeinfo, logger):
 	#shouldn't come here if everything is ok
 	logger.error('unexcept error: fun run in mod scales should not return')
 	return 0
+
+if __name__=='__main__':
+	config = getconfig(configfilepath)
