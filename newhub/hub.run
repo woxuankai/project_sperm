@@ -1,0 +1,9 @@
+#!/bin/sh
+
+nowdate=`date +%Y_%m_%d_%H_%M`
+logpath="/var/log/project_sperm"
+logfile="${logpath}/run_${nowdate}.log"
+mkdir -p $logpath
+echo "${nowdate}" >> $logfile
+cd `dirname "$(pwd)/${0}"`
+python3 ./run.py ./config.json all start >> ${logfile} 2>&1
