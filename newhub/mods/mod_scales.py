@@ -15,6 +15,7 @@ def run(nodeinfo, logger):
 		ser = serial.Serial(nodeinfo['devname'],nodeinfo['baudrate'])
 		#	flush input
 		ser.flushInput()
+		ser.close()
 		#	ingore bad line
 		#ser.readline()
 	except:
@@ -33,12 +34,14 @@ def run(nodeinfo, logger):
 		#listen and grab data
 		try:
 			time.sleep(timeinterval)
+			ser = serial.Serial(nodeinfo['devname'],nodeinfo['baudrate'])
 			#flush input
 			ser.flushInput()
 			#ingore bad line
 			data = ser.readline()
 			#re_read
 			data = ser.readline()
+			ser.close()
 			data = data.decode('utf-8')
 		except Exception as e:
 			logger.exception('failed to read data from serial port')
