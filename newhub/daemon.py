@@ -41,6 +41,9 @@ def daemon_start(nodeconfig):
 	pid = os.fork()
 	if pid != 0:
 		#	the parent(run) process
+		pid, status = os.wait()
+		exitcode = int(status>>8)
+		logger.info('parent of #2 fork exited with {}'.format(exitcode))
 		return pid
 	#	the child(daemon) process
 	###	have to record and handle errors oneself
@@ -61,9 +64,9 @@ def daemon_start(nodeconfig):
 		logger.exception('failed to do second fork')
 		exit(1)
 	if pid != 0:
-		###	the second parent process
+		###	the parent process of #2 fork
 		exit(0)
-	logger.info('deamon process forked')
+	logger.info('daemon process forked')
 	##	redirect standard file descriptors
 	try:
 		sys.stdout.flush()
@@ -77,7 +80,7 @@ def daemon_start(nodeconfig):
 	except :
 		logger.exception('failed to redirect standard file descriptors')
 		exit(1)
-	logger.info('deamonized')
+	logger.info('daemonized')
 	##	write ppidfile
 	#atexit.register(self.delpid)
 	#pid = str(os.getpid())
@@ -152,3 +155,42 @@ def daemon_start(nodeconfig):
 	## end of while
 	logger.info('exit daemon process now')
 	exit(0)
+
+import sys, os, os.path
+if __name__ == '__main__':
+	modpath = os.path.abspath(sys.argv[0])
+	modpath = os.path.dirname(modpath)
+	modpath = os.path.join(modpath,"./mods")
+	sys.path.append(modpath)
+	nodeconfig={"nodetype":"test",\
+"start_delay":2,\
+"restart_delay":2,\
+"repeat_time":5,\
+"logpath":"./__pycache__/",\
+"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",\
+"pidfile":"/temp/project_sperm_test0.pid",\
+"dpidfile":"/temp/project_sperm_test0d.pid",\
+"stdout":"/dev/null",\
+"stdin":"/dev/null",\
+"stderr":"/dev/null",\
+\
+"exitcode":1,"fixexitcode":0}
+	nodeconfig['nodename'] = 'test0'
+	daemon_start(nodeconfig)
+
+#	"test0":
+#	{
+#		"nodetype":"test",
+#		"start_delay":5,
+#		"restart_delay":5,
+#		"repeat_time":5,
+#		"logpath":"/var/log/project_sperm/",
+#		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
+#		"pidfile":"/temp/project_sperm_test0.pid",
+#		"dpidfile":"/temp/project_sperm_test0d.pid",
+#		"stdout":"/dev/null",
+#		"stdin":"/dev/null",
+#		"stderr":"/dev/null",
+#
+#		"exitcode":0
+#	}
