@@ -30,45 +30,60 @@ def uploadoneframe(serveraddr,imgpath):
 
 
 import time, os
-def run(config, logger):
+def run(config, logger, cnt):
 	logger.info('this is func run of mod_cam')
+	#get config
 	try:
 		addr = config['addr']
 		imgfilepath = config['imgfilepath']
-		timeinterval = config['timeinterval']
 		videodevice = config['videodevice']
 		resolution = config['resolution']
 	except:
 		logger.exception('missing config para')
 		exit(1)
-	cnt = 0
-	timenext = time.time()#just put it here to save a try--except
-	while True:
-		cnt = cnt + 1
-		try:
-			sleeptime = timenext - time.time()
-			if sleeptime < 0:
-				sleeptime = 0
-			time.sleep(sleeptime)
-			timenext = timenext + timeinterval
-		except:
-			logger.exception('failed to sleep')
-			exit(1)
-		try:
-			#capture and save a frame
-			caponeframe(imgfilepath, videodevice, resolution)
-		except:
-			logger.exception('#{} failed to capture'.format(cnt))
-			continue
-		logger.info('#{} captured'.format(cnt))
-		#	upload a frame
-		#	no need to fork
-		try:
-			result = uploadoneframe(addr, imgfilepath)
-		except:
-			logger.exception('#{} failed to upload'.format(cnt))
-			continue
-		logger.info('#{} uploaded, result: {}'.format(cnt, result))
-	#end of loop
-	exit(1)
-	return
+	#capture and save a frame
+	try:
+		caponeframe(imgfilepath, videodevice, resolution)
+	except:
+		logger.exception('#{} failed to capture'.format(cnt))
+		exit(1)
+	logger.info('#{} captured'.format(cnt))
+	#	upload a frame
+	#	no need to fork
+	try:
+		result = uploadoneframe(addr, imgfilepath)
+	except:
+		logger.exception('#{} failed to upload'.format(cnt))
+		exit(2)
+	logger.info('#{} uploaded, result: {}'.format(cnt, result))
+	exit(0)
+	return 0
+
+import os, os.path
+def fix(config, logger, cnt):
+	logger.info('this is func fix of mod_cam')
+	#get config
+	try:
+		addr = config['addr']
+		imgfilepath = config['imgfilepath']
+		videodevice = config['videodevice']
+		resolution = config['resolution']
+	except:
+		logger.exception('missing config para')
+		exit(1)
+	if not os.path.exits(videodevice):
+		logger.error('not such device, failed to fix')
+		exit(1)
+	exit(0)
+	return 0
+
+import logging
+if __name__=='__main__':
+	logger = logging.getLogger()
+	cnt=9527
+	config={"addr":"http://211.83.111.245/biaoben/img_receive.php",\
+"imgfilepath":"/tmp/img_cam0.jpg",\
+"videodevice":"/dev/video0",\
+"resolution":[1280,720]}
+	run(config, logger, cnt)
+	print('pass!')
