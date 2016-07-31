@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
+logfiletimeformat='%Y_%m_%d_%H_%M_%S'
 
 import os, os.path, importlib, logging, time, sys, atexit
 #non-blocck, returns daemon pid
@@ -11,12 +11,11 @@ def daemon_start(nodeconfig):
 	nodetype = nodeconfig.pop('nodetype')
 	start_delay = nodeconfig.pop('start_delay')
 	restart_delay = nodeconfig.pop('restart_delay')
-	max_retry = nodeconfig.pop('max_retry')
+	repeat_time = nodeconfig.pop('repeat_time')
 	assert(start_delay >= 0)
 	assert(restart_delay >= 0)
-	assert(type(max_retry) == int)
+	assert(type(repeat_time) == int)
 	logpath = nodeconfig.pop('logpath')
-	logsuffixformat = nodeconfig.pop('logsuffixformat')
 	logformat = nodeconfig.pop('logformat')
 	pidfile = nodeconfig.pop('pidfile')
 	dpidfile = nodeconfig.pop('dpidfile')
@@ -27,7 +26,8 @@ def daemon_start(nodeconfig):
 	#	set log system
 	logger = logging.getLogger(nodename)
 	logger.setLevel(logging.INFO)
-	stimenow = time.strftime(logsuffixformat, time.localtime())
+	stimenow = time.strftime(logfiletimeformat, time.localtime())
+	logpath = logpath+"log_{}_"+nodename+".log"
 	logfilepath = logpath.format(stimenow)
 	logfile_handler = logging.FileHandler(logfilepath)
 	#logfile_handler = logging.StreamHandler()
@@ -86,8 +86,9 @@ def daemon_start(nodeconfig):
 	try:
 		mod = importlib.import_module("mod_"+nodetype)
 		handler_run = getattr(mod, "run")
+		handler_fix = getattr(mod, "fix")
 	except :
-		logger.exception('failed to load mod to run node')
+		logger.exception('failed to load mod or func')
 		exit(1)
 	logger.info('loaded function handler')
 	#	wait a moment
@@ -97,35 +98,57 @@ def daemon_start(nodeconfig):
 		logger.exception('failed to do start delay')
 	logger.info('now fork for work process')
 	#	fork for work process
-	if max_retry >= 0:
-		max_retry = max_retry + 1
-	while max_retry != 0:
-		if max_retry > 0:
-			max_retry = max_retry - 1
+	cnt = 0
+	while cnt < repeat_time:
+		cnt = cnt + 1
+		#fork for work func
 		try:
 			pid = os.fork()
 		except :
-			logger.exception('failed to fork')
+			logger.exception('failed to fork for work func')
+
+		##the child process
 		if pid == 0:
-			#	the child process
-			handler_run(nodeconfig,logger)
-			logger.info('work func return')
+			logger.info('forked for work func')
+			handler_run(nodeconfig, logger, cnt)
+			logger.warning('work func return')
 			exit(0)
-		#	parent process
-		# successfully forked
-		logger.info('forked for node')
-		#wait
+
+		##parent process
 		pid, status = os.wait()
 		exitcode = int(status>>8)
 		logger.info('work process exited with {}'.format(exitcode))
-		if exitcode == 0:
-			break
-		logger.info('wait and restart worker: {} left'.format(max_retry))
+
+		#handle problem
+		if exitcode != 0:
+			logger.info('try to fix problems')
+			#fork for fix func
+			try:
+				pid = os.fork()
+			except:
+				logger.exception('failed to fork to fix problems')
+			if pid == 0:
+			#child
+				handler_fix(nodeconfig, logger, exitcode)
+				logger.warning('fix func return')
+				exit(0)
+			#parent
+			pid, status = os.wait()
+			exitcode = int(status>>8)
+			logger.info('fix process exited with {}'.format(exitcode))
+			if exitcode != 0:
+				#failed to fix problem
+				logger.error('failed to fix problems')
+				break
+			else:
+				logger.info('successfully fixed problems')
+
+		logger.info('#{}: wait and restart worker'.format(cnt))
 		try:
 			time.sleep(restart_delay)
 		except:
 			logger.exception('failed to do restart delay')
-			exit(1)
-	## out of the loop
+			break
+	## end of while
 	logger.info('exit daemon process now')
 	exit(0)
