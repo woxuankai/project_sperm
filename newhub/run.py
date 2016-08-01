@@ -29,7 +29,8 @@ if __name__ == '__main__':
 		#the reset of sys.argv(node2start)
 
 	except Exception:
-		logging.exception("usage: run.py config nodename|all start|stop")
+		logging.exception("\
+usage: run.py configfile start|stop|restart node1 node2 node3...")
 		exit(1)
 	#load config file
 	try:
@@ -49,6 +50,6 @@ if __name__ == '__main__':
 			logging.exception(\
 'failed to start node daemon<{}>'.format(nodename))
 		else:
-			logging.info('node daemon {} started'.format(nodename))
+			logging.info('node daemon <{}> started'.format(nodename))
 	logging.info('all nodes started, exit now')
 	exit(0)

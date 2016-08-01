@@ -2,21 +2,26 @@
 	"maillog":
 	{
 		"nodetype":"maillog",
-		"start_delay":60,
+		"start_delay":600,
 		"restart_delay":60,
-		"repeat_time":1,
+		"repeat_time":-1,
 		"logpath":"/var/log/project_sperm/",
 		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
 		"pidfile":"/temp/project_sperm_maillog.pid",
 		"dpidfile":"/temp/project_sperm_maillogd.pid",
 		"stdout":"/dev/null",
 		"stdin":"/dev/null",
-		"stderr":"/dev/null",
-
-		"from":"one_mail_addr@163.com",
-		"passwd":"1authcode",
-		"mail_list":["woxuankai@gmail.com"],
-		"logs2update":["/var/log/project_sperm/"]
+		"stderr":"/dev/null",		
+		"smtp":
+		{
+			"account":"one_mail_addr@163.com",
+			"passwd":"1authcode",
+			"server":"smtp.163.com",
+			"server_port":25,
+			"from_addr":"one_mail_addr@163.com",
+			"to_addrs":["woxuankai@gmail.com"],
+		},
+		"logspath":["/var/log/project_sperm/"]
 	},
 	"scales1":
 	{
