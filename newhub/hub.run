@@ -6,6 +6,6 @@ logfile="${logpath}/log_${nowdate}_run.log"
 mkdir -p $logpath
 echo "${nowdate}" >> $logfile
 cd `dirname "$(pwd)/${0}"`
-python3 ./run.py ./config.json start test0>> ${logfile} 2>&1 &
+python3 ./run.py ./config.json start cam0 scales1>> ${logfile} 2>&1 &
 ./wait_reboot.sh 6h  >> ${logfile} 2>&1 &
 exit 0
