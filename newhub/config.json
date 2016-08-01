@@ -11,13 +11,14 @@
 		"dpidfile":"/temp/project_sperm_maillogd.pid",
 		"stdout":"/dev/null",
 		"stdin":"/dev/null",
-		"stderr":"/dev/null",		
+		"stderr":"/dev/null",
 		"smtp":
 		{
 			"account":"one_mail_addr@163.com",
 			"passwd":"1authcode",
 			"server":"smtp.163.com",
-			"server_port":25,
+			"server_port":994,
+			"encryption":true,
 			"from_addr":"one_mail_addr@163.com",
 			"to_addrs":["woxuankai@gmail.com"],
 		},

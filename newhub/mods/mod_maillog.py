@@ -9,37 +9,30 @@ def smtp_sendmail(config, msg):
 	server = config['server']
 	server_port = config['server_port']
 	assert(type(smtp_server_port) == int)
+	encryption = config['encryption']
+	assert(type(encryption) == bool)
 	from_addr = config['from_addr']
 	to_addrs = config['to_addrs']
 	assert(type(to_addrs) == list)
-
+	#msg may be a string containing characters in the ASCII range, \
+	#or a byte string. \
+	#A string is encoded to bytes using the ascii codec, \
+	#and lone \r and \n characters are converted to \r\n characters. 
+	#A byte string is not modified.
 	smtp = smtplib.SMTP(smtp_server, smtp_server_port)
+	smtp.ehlo()
+	if encryption:
+		smtp.starttls()
+		smtp.ehlo()
 	smtp.login(account, passwd)
 	smtp.sendmail(from_addr, to_addrs, msg)
 	smtp.quit()
 
+def email_formmail(config):
+	pass
 
 
 
-import mail, smtplib
-import os, os.path
-def run(config, logger, cnt):
-	logger.info('this is func run of mod_maillog')
-	#get config
-	try:
-		logspath = config['logspath']
-		assert(type(logspath) == list)
-	except:
-		logger.exception('missing config para or wrong format')
-		exit(1)
-	#form a mail
-	try:
-		caponeframe(imgfilepath, videodevice, resolution)
-	except:
-		logger.exception('#{} failed to capture'.format(cnt))
-		exit(1)
-	logger.info('#{} captured'.format(cnt))
-	#send a mail
 
 
 
@@ -74,12 +67,56 @@ with open('/Users/michael/Downloads/test.png', 'rb') as f:
 
 
 
+
+
+
+
+
+
+
+import email, email.mine, email.mine.text
+import os, os.path
+def run(config, logger, cnt):
+	logger.info('this is func run of mod_maillog')
+	#get config
 	try:
-		result = uploadoneframe(addr, imgfilepath)
+		logspath = config['logspath']
+		assert(type(logspath) == list)
+		for onedir in logpath:
+			assert(os.path.isdir(onedir))
+		smtp = config['smtp']
+		assert(type(smtp) == dict)
 	except:
-		logger.exception('#{} failed to upload'.format(cnt))
+		logger.exception('missing config para or of wrong format')
 		exit(1)
-	logger.info('#{} uploaded, result: {}'.format(cnt, result))
+	#fetch files
+	try:
+		logfiles = set()
+		for onedir in logspath:
+			for onefile in os.listdir(onedir)
+				logfiles.add(onefile)
+	except:
+		logger.exception('failed to fetch all log files')
+		exit(1)
+	#form a email
+	try:
+		pass
+	except:
+		logger.exception('failed to form an email'.format(cnt))
+		exit(1)
+	try:
+		pass
+	except:
+		logger.exception('failed to form an email'.format(cnt))
+		exit(1)
+	#send a mail
+	try:
+		smtp_sendmail(config, msg)
+	except:
+		logger.exception('failed to send email'.format(cnt))
+		exit(1)
+	#delete old(not the newest) log files
+	#exit
 	exit(0)
 	return 0
 
