@@ -24,12 +24,12 @@ def postdata (addr, id, weight):
 		#print('!!!!!!!!!!!',res.decode('utf-8'))
 		resdict = json.loads(res.decode('utf-8'))
 		#resdict={}
-		return resdict
+	return resdict
 
 
 if __name__ == '__main__':
 	post_serveraddr = "http://211.83.111.245/biaoben/receive.php"
-	sampleid = 2
+	sampleid = 3
 	sampleweight = 36.234
 	print('uploading sample data...')
 	try:

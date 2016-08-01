@@ -35,7 +35,7 @@
 		"devname":"/dev/ttyUSB0",
 		"baudrate":9600,
 		"scalesid":1,
-		"srvaddr":"http://211.83.111.245/biaoben/receive.php",
+		"srvaddr":"http://211.83.111.245/biaoben/receive.php"
 	},
 	"cam0":
 	{

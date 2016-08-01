@@ -54,13 +54,13 @@ def run(config, logger, cnt):
 		result = uploadoneframe(addr, imgfilepath)
 	except:
 		logger.exception('#{} failed to upload'.format(cnt))
-		exit(2)
+		exit(1)
 	logger.info('#{} uploaded, result: {}'.format(cnt, result))
 	exit(0)
 	return 0
 
 import os, os.path
-def fix(config, logger, cnt):
+def fix(config, logger, exitcode):
 	logger.info('this is func fix of mod_cam')
 	#get config
 	try:
@@ -79,11 +79,14 @@ def fix(config, logger, cnt):
 
 import logging
 if __name__=='__main__':
-	logger = logging.getLogger()
+	logger = logging.getLogger(__name__)
+	ch = logging.StreamHandler()
+	logger.addHandler(ch)
+	logger.setLevel(logging.INFO)
 	cnt=9527
 	config={"addr":"http://211.83.111.245/biaoben/img_receive.php",\
 "imgfilepath":"/tmp/img_cam0.jpg",\
 "videodevice":"/dev/video0",\
 "resolution":[1280,720]}
 	run(config, logger, cnt)
-	print('pass!')
+	print('finished!')
