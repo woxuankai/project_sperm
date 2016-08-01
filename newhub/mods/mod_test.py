@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import time
+import time,logging
 def run(config, logger, cnt):
 	time.sleep(2)
 	logger.info('#{} hello, this is a test mod'.format(cnt))
