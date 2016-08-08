@@ -129,8 +129,8 @@ def run(nodeinfo, logger, cnt):
 	return 0
 
 import os, os.path
-def fix(config, logger, exitcode):
-	logger.info('this is func fix of scales_cam')
+def fix(nodeinfo, logger, exitcode):
+	logger.info('this is func fix of scales mod')
 	#get config
 	try:
 		devname = nodeinfo['devname']
