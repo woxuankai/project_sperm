@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-logfiletimeformat='%Y_%m_%d_%H_%M_%S'
+logfiletimeformat='%Y-%m-%d-%H-%M-%S'
 
 import os, os.path, importlib, logging, time, sys, atexit
 #non-blocck, returns daemon pid

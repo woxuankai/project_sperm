@@ -93,8 +93,9 @@ def run(config, logger, cnt):
 	try:
 		logfiles = set()
 		for onedir in logspath:
-			for onefile in os.listdir(onedir)
-				logfiles.add(onefile)
+			for onefile in os.listdir(onedir):
+				if os.path.isfile(onefile):
+					logfiles.add(onefile)
 	except:
 		logger.exception('failed to fetch all log files')
 		exit(1)
@@ -111,11 +112,15 @@ def run(config, logger, cnt):
 		exit(1)
 	#send a mail
 	try:
-		smtp_sendmail(config, msg)
+		smtp_sendmail(smtpconfig, msg)
 	except:
 		logger.exception('failed to send email'.format(cnt))
 		exit(1)
 	#delete old(not the newest) log files
+	loggroups = {}
+	for onefile in logfiles:
+		dirname,filename = os.path.split(onefile)
+		
 	#exit
 	exit(0)
 	return 0
@@ -133,7 +138,7 @@ def fix(config, logger, exitcode):
 		logger.exception('missing config para')
 		exit(1)
 	if not os.path.exits(videodevice):
-		logger.error('not such device, failed to fix')
+		logger.error('no such device, failed to fix')
 		exit(1)
 	exit(0)
 	return 0

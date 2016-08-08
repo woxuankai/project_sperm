@@ -22,7 +22,8 @@
 			"from_addr":"one_mail_addr@163.com",
 			"to_addrs":["woxuankai@gmail.com"],
 		},
-		"logspath":["/var/log/project_sperm/"]
+		"logspath":["/var/log/project_sperm/"],
+		"logformat":""
 	},
 	"scales1":
 	{
