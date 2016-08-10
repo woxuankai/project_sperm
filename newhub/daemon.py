@@ -102,7 +102,7 @@ def daemon_start(nodeconfig):
 	logger.info('now fork for work process')
 	#	fork for work process
 	cnt = 0
-	while cnt < repeat_time:
+	while cnt < repeat_time or repeat_time < 0:
 		cnt = cnt + 1
 		#fork for work func
 		try:

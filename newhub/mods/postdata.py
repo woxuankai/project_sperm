@@ -22,9 +22,9 @@ def postdata (addr, id, weight):
 			raise ConnectionError('HTTP ERR: ', f.status)
 		res = f.read()
 		#print('!!!!!!!!!!!',res.decode('utf-8'))
-		resdict = json.loads(res.decode('utf-8'))
+		#resdict = json.loads(res.decode('utf-8'))
 		#resdict={}
-	return resdict
+	return res.decode('utf-8')
 
 
 if __name__ == '__main__':
