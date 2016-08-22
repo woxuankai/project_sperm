@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
+
+import os, os.path
+import time
+# delete file if last modification is earlier than time_delete
+def delete_old_file(filepath, time_delete):
+    pass
+
+
+
 import smtplib, logging
 def smtp_sendmail(config, msg):
     #smtp configs
@@ -14,6 +24,8 @@ def smtp_sendmail(config, msg):
     from_addr = config['from_addr']
     to_addrs = config['to_addrs']
     assert(type(to_addrs) == list)
+    time_delete = config['time_delete']
+    assert(type(time_delete) == int)
     #msg may be a string containing characters in the ASCII range, \
     #or a byte string. \
     #A string is encoded to bytes using the ascii codec, \
