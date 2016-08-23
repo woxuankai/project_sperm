@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-def parsedata(data):
-    return float(data[6:14].replace(' ',''))
 
-#def run(nodeinfo, logger):
+def parsedata(data):
+    return float(data[6:14].replace(' ', ''))
+
+# def run(nodeinfo, logger):
 #   logger.info('hello, this is a scales mod')
 #   #   opened serial port and test
 #   try:
@@ -82,9 +83,13 @@ def parsedata(data):
 #   return 0
 
 
-import logging, os, time
+import logging
+import os
+import time
 from postdata import postdata
 import serial
+
+
 def run(nodeinfo, logger, cnt):
     logger.info('hello, this is a scales mod')
     try:
@@ -95,15 +100,15 @@ def run(nodeinfo, logger, cnt):
     except:
         logger.exception('not enough config parameters')
         exit(1)
-    
-    #listen and grab data
+
+    # listen and grab data
     try:
-        ser = serial.Serial(devname,baudrate)
-        #flush input
+        ser = serial.Serial(devname, baudrate)
+        # flush input
         ser.flushInput()
-        #ingore bad line
+        # ingore bad line
         data = ser.readline()
-        #re_read
+        # re_read
         data = ser.readline()
         ser.close()
     except:
@@ -111,27 +116,30 @@ def run(nodeinfo, logger, cnt):
         exit(1)
     logger.info('#{} data received'.format(cnt))
 
-    #parse data
+    # parse data
     try:
         data = data.decode('utf-8')
         weight = parsedata(data)
     except Exception as e:
         logger.exception('failed to decode or parse data')
         exit(1)
-    #fork a new thread to post data
+    # fork a new thread to post data
     try:
         result = postdata(srvaddr, scalesid, weight)
     except:
         logger.exception('#{} failed to post'.format(cnt))
         exit(1)
-    logger.info('#{} data posted, result: {}'.format(cnt,str(result)))
+    logger.info('#{} data posted, result: {}'.format(cnt, str(result)))
     exit(0)
     return 0
 
-import os, os.path
+import os
+import os.path
+
+
 def fix(nodeinfo, logger, exitcode):
     logger.info('this is func fix of scales mod')
-    #get config
+    # get config
     try:
         devname = nodeinfo['devname']
         baudrate = nodeinfo['baudrate']
@@ -146,18 +154,19 @@ def fix(nodeinfo, logger, exitcode):
     exit(0)
     return 0
 
-import logging, sys
-if __name__=='__main__':
+import logging
+import sys
+if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     ch = logging.StreamHandler()
     logger.addHandler(ch)
     logger.setLevel(logging.INFO)
     logger.info('this is test for mod_scales')
-    cnt=9526
-    config={"devname":sys.argv[1],\
-"baudrate":9600,\
-"scalesid":2,\
-"srvaddr":"http://211.83.111.245/biaoben/receive.php"}
+    cnt = 9526
+    config = {"devname": sys.argv[1],
+              "baudrate": 9600,
+              "scalesid": 2,
+              "srvaddr": "http://211.83.111.245/biaoben/receive.php"}
     print('try to run it')
     try:
         run(config, logger, cnt)
