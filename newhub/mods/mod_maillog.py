@@ -105,17 +105,17 @@ def run(config, logger, cnt):
                 msg = email_log2mail(emailconfig, onelog)
                 smtp_sendmail(emailconfig, msg)
             except:
-                logger.exception('failed to  email {}'.format(oenlog))
+                logger.exception('failed to  email {}'.format(onelog))
                 continue
             logger.info('sent')
         # delete old(not the newest) log files
         logger.info('try to delete log file: {}'.format(onelog))
         try:
-            ifdelete = delete_old_file(onefile, time_delete)
+            ifdelete = delete_old_file(onelog, time_delete)
         except:
-            logger.exception('failed to delete log file: {}'.format(onefile))
+            logger.exception('failed to delete log file: {}'.format(onelog))
         else:
-            logger.info('delete the logfile {} ? {}'.format(onefile, ifdelete))
+            logger.info('delete the logfile {} ? {}'.format(onelog, ifdelete))
     logger.info('gone throught all log files')
     
     logger.info('daemon exit now')
@@ -146,6 +146,8 @@ if __name__ == '__main__':
                     "from_addr": "one_mail_addr@163.com",\
                     "to_addrs": ["woxuankai@gmail.com"]\
                 },\
+                "time_delete":10800,\
+                "ifsend":True,\
                 "logspath": ["/var/log/project_sperm/"]\
             }
     run(config, logger, cnt)
