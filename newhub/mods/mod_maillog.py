@@ -94,27 +94,26 @@ def run(config, logger, cnt):
         logger.exception('failed to fetch all log files')
         exit(1)
     logger.info('gathered log files, total {}'.format(len(logfiles)))
-    # send log files by email
-    try:
-        for onelog in logfiles:
+    for onelog in logfiles:
+        # send log files by email
+        try:
             logger.info('forming and sending log file: {}'.format(onelog))
             # form a email
             msg = email_log2mail(emailconfig, onelog)
             smtp_sendmail(emailconfig, msg)
-            logger.info('done')
-    except:
-        logger.exception('failed to form or send emai')
-        exit(1)
-    logger.info('successfully sent all log files')
-    # delete old(not the newest) log files
-    for onefile in logfiles:
+        except:
+            logger.exception('failed to  email {}'.format(oenlog))
+            continue
+        # delete old(not the newest) log files
+        logger.info('done, try to delete it if useless')
         try:
-            ifdelete=time_delete(onefile, time_delete)
+            ifdelete = delete_old_file(onefile, time_delete)
         except:
             logger.exception('failed to delete log file: {}'.format(onefile))
         else:
             logger.info('delete the logfile {} ? {}'.format(onefile, ifdelete))
-    # exit
+    logger.info('gone throught all log files')
+    
     logger.info('daemon exit now')
     exit(0)
     return 0
