@@ -57,6 +57,7 @@ def daemon_start(nodeconfig):
     # have to record and handle errors oneself
     # daemonize process
     # decouple from parent environment
+    time.sleep(1)
     try:
         os.chdir("/tmp")
         os.setsid()
@@ -74,8 +75,9 @@ def daemon_start(nodeconfig):
     if pid != 0:
         # the parent process of #2 fork
         exit(0)
-    logger.info('daemon process forked')
+    logger.info('daemon process forked (#2 fork)')
     # redirect standard file descriptors
+    time.sleep(1)
     try:
         sys.stdout.flush()
         sys.stderr.flush()

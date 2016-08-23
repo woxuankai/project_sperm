@@ -34,8 +34,6 @@ def smtp_sendmail(config, msg):
     from_addr = config['from_addr']
     to_addrs = config['to_addrs']
     assert(type(to_addrs) == list)
-    time_delete = config['time_delete']
-    assert(type(time_delete) == int)
     # msg may be a string containing characters in the ASCII range, \
     # or a byte string. \
     # A string is encoded to bytes using the ascii codec, \
@@ -73,6 +71,8 @@ def run(config, logger, cnt):
     logger.info('this is func run of mod_maillog')
     # get config
     try:
+        time_delete = config['time_delete']
+        assert(type(time_delete) == int)
         logspath = config['logspath']
         assert(type(logspath) == list)
         for onedir in logspath:
@@ -103,7 +103,7 @@ def run(config, logger, cnt):
             smtp_sendmail(emailconfig, msg)
             logger.info('done')
     except:
-        logger.exception('failed to form or send emai'))
+        logger.exception('failed to form or send emai')
         exit(1)
     logger.info('successfully sent all log files')
     # delete old(not the newest) log files
