@@ -73,6 +73,8 @@ def run(config, logger, cnt):
     try:
         time_delete = config['time_delete']
         assert(type(time_delete) == int)
+        ifsend = config['ifsend']
+        assert(type(ifsend) == bool)
         logspath = config['logspath']
         assert(type(logspath) == list)
         for onedir in logspath:
@@ -96,16 +98,18 @@ def run(config, logger, cnt):
     logger.info('gathered log files, total {}'.format(len(logfiles)))
     for onelog in logfiles:
         # send log files by email
-        try:
-            logger.info('forming and sending log file: {}'.format(onelog))
-            # form a email
-            msg = email_log2mail(emailconfig, onelog)
-            smtp_sendmail(emailconfig, msg)
-        except:
-            logger.exception('failed to  email {}'.format(oenlog))
-            continue
+        if ifsend:
+            try:
+                logger.info('forming and sending log file: {}'.format(onelog))
+                # form a email
+                msg = email_log2mail(emailconfig, onelog)
+                smtp_sendmail(emailconfig, msg)
+            except:
+                logger.exception('failed to  email {}'.format(oenlog))
+                continue
+            logger.info('sent')
         # delete old(not the newest) log files
-        logger.info('done, try to delete it if useless')
+        logger.info('try to delete log file: {}'.format(onelog))
         try:
             ifdelete = delete_old_file(onefile, time_delete)
         except:
