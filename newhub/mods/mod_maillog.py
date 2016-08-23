@@ -7,7 +7,13 @@ import os, os.path
 import time
 # delete file if last modification is earlier than time_delete
 def delete_old_file(filepath, time_delete):
-    pass
+    if time_delete < 0:
+        return False
+    lag = time.time() - os.path.getmtime(filepath)
+    if lag > time_delete:
+        os.remove(filepath)
+        return True
+    return False
 
 
 
@@ -79,6 +85,7 @@ def run(config, logger, cnt):
         logger.exception('failed to fetch all log files')
         exit(1)
     logger.info('gathered log files, total {}'.format(len(logfiles)))
+    # send log files by email
     try:
         for onelog in logfiles:
             logger.info('forming and sending log file: {}'.format(onelog))
@@ -87,14 +94,17 @@ def run(config, logger, cnt):
             smtp_sendmail(emailconfig, msg)
             logger.info('done')
     except:
-        logger.exception('failed to form or send email'.format(cnt))
+        logger.exception('failed to form or send emai'))
         exit(1)
     logger.info('successfully sent all log files')
-    #delete old(not the newest) log files
-    #loggroups = {}
-    #for onefile in logfiles:
-    #    dirname,filename = os.path.split(onefile)
-        
+    # delete old(not the newest) log files
+    for onefile in logfiles:
+        try:
+            ifdelete = time_delete(onefile, time_delete)
+        except:
+            logger.exception('failed to delete log file: {}'.format(onefile))
+        else:
+            logger.info('delete the logfile {} ? {}'.format(onefile, ifdelete))
     #exit
     logger.info('daemon exit now')
     exit(0)
