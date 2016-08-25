@@ -47,6 +47,7 @@ usage: run.py configfile start|stop|restart node1 node2 node3...")
         except:
             logging.exception(
                 'no item in configfile for node <{}>'.format(nodename))
+            continue
         nodeconfig['nodename'] = nodename
         try:
             daemon_start(nodeconfig)
