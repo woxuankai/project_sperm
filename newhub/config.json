@@ -71,7 +71,7 @@
 		"start_delay":5,
 		"restart_delay":5,
 		"repeat_time":5,
-		"logpath":"./",
+		"logpath":"/tmp/",
 		"logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
 		"pidfile":"/temp/project_sperm_test0.pid",
 		"dpidfile":"/temp/project_sperm_test0d.pid",

@@ -43,7 +43,7 @@ usage: run.py configfile start|stop|restart node1 node2 node3...")
     for nodename in node2start:
         logging.info('try to start node <{}>'.format(nodename))
         try:
-            nodeconfig = config[nodename]
+            nodeconfig = config[nodename].copy()
         except:
             logging.exception(
                 'no item in configfile for node <{}>'.format(nodename))
