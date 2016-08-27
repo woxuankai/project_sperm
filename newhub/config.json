@@ -24,7 +24,7 @@
 			"to_addrs":["woxuankai@gmail.com"]
 		},
 		"time_delete":10800, 
-		"ifsend":true,
+		"ifsend":false,
 		"logspath":["/var/log/project_sperm/"]
 	},
 	"scales1":
