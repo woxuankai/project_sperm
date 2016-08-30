@@ -13,6 +13,13 @@ def is_old_file(filepath, lag):
     else:
         return False
 
+def pick_old_files(files,lag):
+    oldfiles = set()
+    for onefile in files:
+        if is_old_file(onefile, lag):
+            oldfiles.add(onefile)
+    return oldfiles
+
 def delete_file(filepath):
     os.remove(filepath)
 
@@ -91,21 +98,13 @@ def run(config, logger, cnt):
                 onefile = os.path.join(onedir, onefile)
                 if os.path.isfile(onefile):
                     logfiles.add(onefile)
+        oldfiles = pick_old_files(logfiles, time_delete)
     except:
         logger.exception('failed to fetch all log files')
         exit(1)
-    logger.info('gathered log files, total {}'.format(len(logfiles)))
-    for onelog in logfiles:
-        logger.info('handling file {}'.format(onelog))
-        # is file done ?
-        try:
-            isold = is_old_file(onelog, time_delete)
-            logger.info('is old? {}'.format(isold))
-        except:
-            logger.exception('failed to measure file')
-            continue
-        if not isold:
-            continue
+    logger.info('gathered log files, total {}, old {}'.format(len(logfiles), len(oldfiles)))
+    for onelog in oldfiles:
+        logger.info('processing file {}'.format(onelog))
         # send log files by email
         try:
             # form a email
@@ -123,7 +122,7 @@ def run(config, logger, cnt):
             logger.exception('failed to delete')
             continue
         logger.info('deleted')
-    logger.info('gone throught all log files')
+    logger.info('gone throught all old log files')
     
     logger.info('daemon exit now')
     exit(0)
@@ -153,7 +152,7 @@ if __name__ == '__main__':
                     "from_addr": "one_mail_addr@163.com",\
                     "to_addrs": ["woxuankai@gmail.com"]\
                 },\
-                "time_delete":10800,\
+                "time_delete":80,\
                 "ifsend":True,\
                 "logspath": ["/var/log/project_sperm/"]\
             }
