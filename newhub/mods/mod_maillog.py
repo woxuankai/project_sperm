@@ -6,16 +6,15 @@ import os
 import os.path
 import time
 # delete file if last modification is earlier than time_delete
-
-
-def delete_old_file(filepath, time_delete):
-    if time_delete < 0:
-        return False
-    lag = time.time() - os.path.getmtime(filepath)
-    if lag > time_delete:
-        os.remove(filepath)
+def is_old_file(filepath, lag):
+    # if lag is negative, the the file is never old
+    if (lag >= 0) and (lag < time.time() - os.path.getmtime(filepath)):
         return True
-    return False
+    else:
+        return False
+
+def delete_file(filepath):
+    os.remove(filepath)
 
 
 import smtplib
@@ -97,25 +96,33 @@ def run(config, logger, cnt):
         exit(1)
     logger.info('gathered log files, total {}'.format(len(logfiles)))
     for onelog in logfiles:
-        # send log files by email
-        if ifsend:
-            try:
-                logger.info('forming and sending log file: {}'.format(onelog))
-                # form a email
-                msg = email_log2mail(emailconfig, onelog)
-                smtp_sendmail(emailconfig, msg)
-            except:
-                logger.exception('failed to  email {}'.format(onelog))
-                continue
-            logger.info('sent')
-        # delete old(not the newest) log files
-        logger.info('try to delete log file: {}'.format(onelog))
+        logger.info('handling file {}'.format(onelog))
+        # is file done ?
         try:
-            ifdelete = delete_old_file(onelog, time_delete)
+            isold = is_old_file(onelog, time_delete)
+            logger.info('is old? {}'.format(isold))
         except:
-            logger.exception('failed to delete log file: {}'.format(onelog))
-        else:
-            logger.info('delete the logfile {} ? {}'.format(onelog, ifdelete))
+            logger.exception('failed to measure file')
+            continue
+        if not isold:
+            continue
+        # send log files by email
+        try:
+            # form a email
+            msg = email_log2mail(emailconfig, onelog)
+            # send it 
+            smtp_sendmail(emailconfig, msg)
+        except:
+            logger.exception('failed to  email')
+            continue
+        logger.info('sent')
+        # delete old log files
+        try:
+            delete_file(onelog)
+        except:
+            logger.exception('failed to delete')
+            continue
+        logger.info('deleted')
     logger.info('gone throught all log files')
     
     logger.info('daemon exit now')

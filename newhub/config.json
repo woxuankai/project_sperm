@@ -23,7 +23,7 @@
 			"from_addr":"one_mail_addr@163.com",
 			"to_addrs":["woxuankai@gmail.com"]
 		},
-		"time_delete":10800, 
+		"time_delete":11100, 
 		"ifsend":true,
 		"logspath":["/var/log/project_sperm/"]
 	},
