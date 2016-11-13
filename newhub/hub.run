@@ -3,13 +3,14 @@
 nowdate=`date +%Y-%m-%d-%H-%M-%S`
 logpath="/var/log/project_sperm"
 logfile="${logpath}/log_${nowdate}_run.log"
+errlogfile="${logpath}/logerr_${nowdate}_run.log"
 mkdir -p $logpath
 echo "${nowdate}" >> $logfile
 cd `dirname "$(pwd)/${0}"`
 ./wait_reboot.sh 8h  >> ${logfile} 2>&1 &
 #python3 ./run.py ./config.json start maillog  >> ${logfile} 2>&1 &
 #python3 ./run.py ./config.json start maillog cam0 scales1>> ${logfile} 2>&1 &
-python3 ./run.py ./config.json start maillog >> ${logfile} 2>&1 &
-python3 ./run.py ./config.json start cam0 >> ${logfile} 2>&1 &
-python3 ./run.py ./config.json start scales1 >> ${logfile} 2>&1 &
+python3 ./run.py ./config.json start maillog >>${logfile} 2>>${errlogfile} &
+python3 ./run.py ./config.json start cam0 >>${logfile} 2>>${errlogfile} &
+python3 ./run.py ./config.json start scales1 >>${logfile} 2>>${errlogfile} &
 exit 0
