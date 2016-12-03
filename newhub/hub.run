@@ -6,11 +6,14 @@ logfile="${logpath}/log_${nowdate}_run.log"
 errlogfile="${logpath}/logerr_${nowdate}_run.log"
 mkdir -p $logpath
 echo "${nowdate}" >> $logfile
-cd `dirname "$(pwd)/${0}"`
-./wait_reboot.sh 24h  >> ${logfile} 2>&1 &
+WORKDIR=`dirname ${0}`
+if test ${WORKDIR[0]} != '/'; then #is not an absolute path
+    WORKDIR="$(pwd)/${workdir}";
+fi
+${WORKDIR}/wait_reboot.sh 24h  >> ${logfile} 2>&1 &
 #python3 ./run.py ./config.json start maillog  >> ${logfile} 2>&1 &
 #python3 ./run.py ./config.json start maillog cam0 scales1>> ${logfile} 2>&1 &
-python3 ./run.py ./config.json start maillog >>${logfile} 2>>${errlogfile} &
-python3 ./run.py ./config.json start cam0 >>${logfile} 2>>${errlogfile} &
-python3 ./run.py ./config.json start scales1 >>${logfile} 2>>${errlogfile} &
+${WORKDIR}/run.py ${WORKDIR}/config/maillog1.json start 1>>/dev/null 2>>${errlogfile} &
+${WORKDIR}/run.py ${WORKDIR}/config/cam0.json     start 1>>/dev/null 2>>${errlogfile} &
+${WORKDIR}/run.py ${WORKDIR}/config/scale1.json   start 1>>/dev/null 2>>${errlogfile} &
 exit 0

@@ -7,6 +7,9 @@ import os
 import os.path
 from getconfig import getconfig
 from daemon import daemon_start
+
+mods_dir='./mods'
+
 if __name__ == '__main__':
     # slove path problems
     logging.basicConfig(level=logging.DEBUG)
@@ -18,7 +21,7 @@ if __name__ == '__main__':
         basedir = os.path.dirname(node2start.pop(0))
         # add mods folder to path
         basedir = os.path.abspath(basedir)
-        modpath = os.path.join(basedir, "./mods")
+        modpath = os.path.join(basedir, mods_dir)
         assert(os.path.isdir(modpath))
         sys.path.append(modpath)
         # argument 1 - path of config file
