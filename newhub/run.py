@@ -6,7 +6,7 @@ import sys
 import os
 import os.path
 from getconfig import getconfig
-from daemon import daemon_start
+from entry import entry
 
 mods_dir='./mods'
 
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     try:
         node2start = sys.argv.copy()
-        if len(node2start) < 4:
+        if len(node2start) < 3:
             raise NameError("not enough arguments")
         # argument 0 - path of run.py
         basedir = os.path.dirname(node2start.pop(0))
@@ -30,34 +30,26 @@ if __name__ == '__main__':
             raise NameError("not a config file")
         # argument 2 - what to do? start|stop|restart
         todo = node2start.pop(0)  # under development
-        # argument 3:end - nodes to run
-        # the reset of sys.argv(node2start)
-
     except Exception:
         logging.exception("\
-usage: run.py configfile start|stop|restart node1 node2 node3...")
+usage: run.py configfile start|stop|restart")
         exit(1)
+
     # load config file
+    logging.info('loading config file...')
     try:
         config = getconfig(configfilepath)
+        config_basic = config['basic'].copy()
+        config_daemon = config['daemon'].copy()
+        config_spec = config['spec'].copy()
     except Exception:
         logging.exception('fail to load config file: ' + configfilepath)
         exit(1)
-    for nodename in node2start:
-        logging.info('try to start node <{}>'.format(nodename))
-        try:
-            nodeconfig = config[nodename].copy()
-        except:
-            logging.exception(
-                'no item in configfile for node <{}>'.format(nodename))
-            continue
-        nodeconfig['nodename'] = nodename
-        try:
-            daemon_start(nodeconfig)
-        except Exception:
-            logging.exception(
-                'failed to start node daemon<{}>'.format(nodename))
-        else:
-            logging.info('node daemon <{}> started'.format(nodename))
-    logging.info('all nodes started, exit now')
+    logging.info('passing arguments to entry...')
+    try:
+        entry(nodeconfig,todo)
+    except Exception:
+        logging.exception('failed to start entry')
+        exit(1)
+    logging.info('returned from entrt, exit now')
     exit(0)
