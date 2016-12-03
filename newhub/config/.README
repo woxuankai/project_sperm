@@ -1,0 +1,1 @@
+all file in the directory will be considered as one config file for one node, except those start with '.' or '~'
