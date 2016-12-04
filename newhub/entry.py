@@ -123,7 +123,7 @@ def entry(config,todo):
                 logging.exception('failed to send signal {}'.format(pid))
                 sys.exit(1)
         for cnt in range(0,term_wait_repeat):
-            os.sleep(time_term)
+            time.sleep(time_term)
             try:
                 os.kill(pid, signal.SIGTERM)
             except OSError as e:
