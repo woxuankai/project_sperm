@@ -42,7 +42,7 @@ done
 
 sleep 24h
 
-for ONECONFIGFILE in CONFIGFILELIST
+for ONECONFIGFILE in  {maillog0,cam0,scales1}.json
 do
     echo '...stoping '${ONECONFIGFILE} >>${LOGFILE} 2>&1
     ${WORKDIR}/run.py ${WORKDIR}/config/${ONECONFIGFILE} stop

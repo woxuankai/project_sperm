@@ -6,8 +6,9 @@
     "restart_delay":550,
     "repeat_time":-1,
 
-    "logpath":"/var/log/project_sperm/log_cam0.log",
-    "logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
+    "filename":"/var/log/project_sperm/log_cam0.log",
+    "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
+    "level":"DEBUG"
 },
 "daemon":
 {

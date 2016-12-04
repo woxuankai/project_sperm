@@ -2,9 +2,13 @@
 "basic":
 {
     "nodetype":"scales",
-    "logpath":"/var/log/project_sperm/scales1.log",
-    "logformat":\
-    "%(asctime)s - %(levelname)s - %(name)s : %(message)s"
+    "start_delay":23,
+    "restart_delay":301,
+    "repeat_time":-1,
+    
+    "filename":"/var/log/project_sperm/scales1.log",
+    "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
+    "level":"DEBUG"
 },
 "daemon":
 {
@@ -15,9 +19,6 @@
 },
 "spec":
 {
-    "start_delay":23,
-    "restart_delay":301,
-    "repeat_time":-1,
     "devname":"/dev/ttyUSB0",
     "baudrate":9600,
     "scalesid":1,
