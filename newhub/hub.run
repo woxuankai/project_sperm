@@ -5,25 +5,26 @@ LOGDIR="/var/log/project_sperm"
 #LOGFILE="${LOGPATH}/${NOWDATE}_log_run.log"
 
 mkdir -p $LOGDIR
-echo "${NOWDATE}"# >> $LOGFILE
+echo "${NOWDATE}"
 
 WORKDIR=`dirname ${0}`
-if test ${WORKDIR:0:1} != '/'; then #is not an absolute path
+if test ${WORKDIR:0:1} != '/'; then
+    #is not an absolute path
     WORKDIR="$(pwd)/${WORKDIR}";
 fi
 
 # redundence
-echo '...redundant reboot prepare'# >>${LOGFILE} 2>&1
-${WORKDIR}/wait_reboot.sh 30h & # >>${LOGFILE} 2>&1 0</dev/zero &
+echo '...redundant reboot prepare'
+${WORKDIR}/wait_reboot.sh 30h &
 
-echo '...update project_sperm_d.run'# >>${LOGFILE} 2>&1
+echo '...update project_sperm_d.run'
 cp ${WORKDIR}/project_sperm_d.run  ${WORKDIR}/../../project_sperm_d.run
 
 #start all
-echo '...installing python-daemon' #>>${LOGFILE} 2>&1
+echo '...installing python-daemon' 
 pip3 install python-daemon
 
-echo '...creating link files' #>>${LOGFILE} 2>&1
+echo '...creating link files'
  
 
 for ONELOGFILE in {maillog0,cam0,scales1}.{stdout,stderr,log}
@@ -36,7 +37,7 @@ done
 
 for ONECONFIGFILE in {maillog0,cam0,scales1}.json
 do
-    echo '...starting '${ONECONFIGFILE} # >>${LOGFILE} 2>&1
+    echo '...starting '${ONECONFIGFILE}
     ${WORKDIR}/run.py ${WORKDIR}'/config/'${ONECONFIGFILE} start
 done
 
@@ -44,7 +45,7 @@ sleep 24h
 
 for ONECONFIGFILE in  {maillog0,cam0,scales1}.json
 do
-    echo '...stoping '${ONECONFIGFILE} #>>${LOGFILE} 2>&1
+    echo '...stoping '${ONECONFIGFILE} 
     ${WORKDIR}/run.py ${WORKDIR}'/config/'${ONECONFIGFILE} stop
 done
 
