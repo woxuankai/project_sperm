@@ -31,7 +31,7 @@ def main_clean(config):
     pass
 
 #clean and init logger
-def mian_init(config):
+def main_init(config):
     initlogger(config['basic'])
     main_clean(config)
 
