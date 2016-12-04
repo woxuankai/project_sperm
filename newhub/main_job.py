@@ -21,7 +21,7 @@ def initlogger(config_basic):
     # only root logger writes to logfile
     logging.basicConfig(
         filename = config_basic['filename'], # must specify one
-        level    = config_basic.get('level','WARNING'),
+        level    = leveldict[config_basic.get('level','WARNING')],
         format   = config_basic.get('format',defaultlogformat))
     #logger = logging.getLogger(configbasic.get('name','defaultname'))
     #logger = logging.getLogger()
