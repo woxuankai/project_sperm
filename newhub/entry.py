@@ -8,6 +8,7 @@ import signal
 import os
 import os.path
 import time
+import logging
 from main_job import main_do, main_clean, main_init
 
 #time waiting for a process to terminate after send sigterm
