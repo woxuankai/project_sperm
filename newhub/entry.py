@@ -14,7 +14,7 @@ from main_job import main_do, main_clean, main_init
 
 #time waiting for a process to terminate after send sigterm
 term_wait = 0.5
-time_wait_repeat = 20
+term_wait_repeat = 20
 
 
 # for daemon.open()
@@ -122,7 +122,7 @@ def entry(config,todo):
             else:
                 logging.exception('failed to send signal {}'.format(pid))
                 sys.exit(1)
-        for cnt in range(0,time_term_repeat):
+        for cnt in range(0,term_wait_repeat):
             os.sleep(time_term)
             try:
                 os.kill(pid, signal.SIGTERM)
