@@ -84,8 +84,12 @@ def entry(config,todo):
             main_init(config)
             with context:
                 main_do(config)
-        except:
-            logging.exception('some thing wrong in child process')
+        except Exception as e:
+            if type(e) == SystemExit or e.code != 0:
+                logging.exception(\
+                    'something wrong with child or grandchild')
+             else:
+                logging.info('exited with 0')
             sys.exit(1)
 
             

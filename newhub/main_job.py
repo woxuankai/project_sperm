@@ -78,7 +78,7 @@ def main_do(config):
             logger.info('forked for work func')
             handler_run(nodeconfig, logger, cnt)
             logger.warning('work func return')
-            sys.exit(0)
+            sys.exit(0)# without this exit, 1-2-4-8...will happen
 
         # parent process
         pid, status = os.wait()
