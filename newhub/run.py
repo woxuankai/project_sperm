@@ -47,7 +47,7 @@ usage: run.py configfile start|stop|restart")
         exit(1)
     logging.info('passing arguments to entry...')
     try:
-        entry(nodeconfig,todo)
+        entry(config,todo)
     except Exception:
         logging.exception('failed to start entry')
         exit(1)
