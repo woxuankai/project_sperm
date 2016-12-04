@@ -86,6 +86,7 @@ def entry(config,todo):
                 main_do(config)
         except:
             logging.exception('some thing wrong in child process')
+            sys.exit(1)
 
             
     def entry_stop(config):

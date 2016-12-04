@@ -39,7 +39,7 @@ def main_init(config):
 def main_do(config):
     logger = logging.getLogger()
     try:
-        start_delay   = config['basic']['start_dealy']
+        start_delay   = config['basic']['start_delay']
         repeat_time   = config['basic']['repeat_time']
         restart_delay = config['basic']['restart_delay']
         nodeconfig    = config['spec']
