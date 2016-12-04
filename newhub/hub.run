@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NOWDATE=`date +%Y-%m-%d-%H-%M-%S`
 LOGDIR="/var/log/project_sperm"
