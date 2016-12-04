@@ -90,7 +90,7 @@ def entry(config,todo):
                     'something wrong with child or grandchild')
             else:
                 logging.info('exited with 0')
-            sys.exit(1)
+        sys.exit(1)
 
             
     def entry_stop(config):
