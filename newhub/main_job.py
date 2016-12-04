@@ -30,10 +30,12 @@ def initlogger(config_basic):
 
 
 def main_clean(config):
+    logging.info('here is main_clean')
     pass
 
 #clean and init logger
 def main_init(config):
+    logging.info('here is main_init')
     initlogger(config['basic'])
     main_clean(config)
 

@@ -63,13 +63,14 @@ def entry(config,todo):
                     # in prevention of open the same file twice
                     f = open(config_daemon['stderr'],'a')
                 context.stderr = f
+            #context.signal_map = {signal.SIGTERM : main_clean}
+            #use default map
+            #main_clean has to receive 'config', to be completed in ohter way
         except Exception:
             logging.exception('failed to set daemon context')
             sys.exit(1)
 
-        context.signal_map = {
-            signal.SIGTERM : main_clean}
-        logging.info('daemon context inited')
+                logging.info('daemon context inited')
         try:
             pid = os.fork()
             assert pid != -1

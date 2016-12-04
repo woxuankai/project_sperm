@@ -1,20 +1,21 @@
+{
 "basic":
 {
     "nodetype":"maillog",
     "start_delay":10800,
     "restart_delay":3600,
     "repeat_time":1,
-    "logpath":"/var/log/project_sperm/",
+
+    "logpath":"/var/log/project_sperm/maillog0.log",
     "logformat":\
     "%(asctime)s - %(levelname)s - %(name)s : %(message)s"
 },
 "daemon":
 {
-    "pidfile":"/temp/project_sperm_maillog.pid",
-    "dpidfile":"/temp/project_sperm_maillogd.pid",
-    "stdout":"/dev/null",
+    "pidfile":"/var/run/project_sperm_maillog0.pid",
+    "stdout":"/var/log/project_sperm/maillog0.stdout",
     "stdin":"/dev/null",
-    "stderr":"/dev/null"
+    "stderr":"/var/log/project_sperm/maillog0.stderr"
 },
 "spec":
 {
@@ -28,4 +29,5 @@
     "time_delete":11101,
     "ifsend":true,
     "logspath":["/var/log/project_sperm/"]
+}
 }
