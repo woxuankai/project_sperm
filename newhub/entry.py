@@ -87,7 +87,7 @@ def entry(config,todo):
                 main_do(config)
         except Exception as e:
             logging.info('#############################')
-            if (type(e) == SystemExit) or (e.code != 0):
+            if (type(e) != SystemExit) or (e.code != 0):
                 logging.exception(\
                     'something wrong with child or grandchild')
             else:
