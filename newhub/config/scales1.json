@@ -1,9 +1,6 @@
 "basic":
 {
     "nodetype":"scales",
-    "start_delay":23,
-    "restart_delay":301,
-    "repeat_time":-1,
     "logpath":"/var/log/project_sperm/",
     "logformat":\
     "%(asctime)s - %(levelname)s - %(name)s : %(message)s"
@@ -11,13 +8,15 @@
 "daemon":
 {
     "pidfile":"/temp/project_sperm_scales1.pid",
-    "dpidfile":"/temp/project_sperm_scales1d.pid",
     "stdout":"/dev/null",
     "stdin":"/dev/null",
     "stderr":"/dev/null"
 },
 "spec":
 {
+    "start_delay":23,
+    "restart_delay":301,
+    "repeat_time":-1,
     "devname":"/dev/ttyUSB0",
     "baudrate":9600,
     "scalesid":1,

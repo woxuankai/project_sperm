@@ -51,5 +51,5 @@ usage: run.py configfile start|stop|restart")
     except Exception:
         logging.exception('failed to start entry')
         exit(1)
-    logging.info('returned from entrt, exit now')
+    logging.info('returned from entry, exit now')
     exit(0)

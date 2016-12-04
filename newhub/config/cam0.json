@@ -1,22 +1,21 @@
 "basic":
 {
     "nodetype":"cam",
-    "start_delay":15,
-    "restart_delay":550,
-    "repeat_time":-1,
-    "logpath":"/var/log/project_sperm/",
+    "logpath":"/var/log/project_sperm/log_cam0.log",
     "logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
 },
 "daemon":
 {
-    "pidfile":"/temp/project_sperm_cam0.pid",
-    "dpidfile":"/temp/project_sperm_cam0d.pid",
+    "pidfile":"/var/run/project_sperm_cam0.pid",
     "stdout":"/dev/null",
     "stdin":"/dev/null",
-    "stderr":"/dev/null"
+    "stderr":"/var/null"
 },
 "spec":
 {
+    "start_delay":15,
+    "restart_delay":550,
+    "repeat_time":-1,
     "addr":"http://211.83.111.245/biaoben/img_receive.php",
     "imgfilepath":"/tmp/img_cam0.jpg",
     "videodevice":"/dev/video0",

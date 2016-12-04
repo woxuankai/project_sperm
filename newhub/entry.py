@@ -1,208 +1,135 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-logfiletimeformat = '%Y-%m-%d-%H-%M-%S'
-
+import sys
+import daemon
+import lockfile
+import signal
 import os
 import os.path
-import importlib
-import logging
 import time
-import sys
-import atexit
-# non-blocck, returns daemon pid
+from main_job import main_do, main_clean, main_init
+
+#time waiting for a process to terminate after send sigterm
+term_wait = 0.5
+time_wait_repeat = 20
 
 
-def daemon_start(nodeconfig):
-    #   assert common config
-    nodename = nodeconfig.pop('nodename')
-    nodetype = nodeconfig.pop('nodetype')
-    start_delay = nodeconfig.pop('start_delay')
-    restart_delay = nodeconfig.pop('restart_delay')
-    repeat_time = nodeconfig.pop('repeat_time')
-    assert(start_delay >= 0)
-    assert(restart_delay >= 0)
-    assert(type(repeat_time) == int)
-    logpath = nodeconfig.pop('logpath')
-    logformat = nodeconfig.pop('logformat')
-    pidfile = nodeconfig.pop('pidfile')
-    dpidfile = nodeconfig.pop('dpidfile')
-    stdin = nodeconfig.pop('stdin')
-    stdout = nodeconfig.pop('stdout')
-    stderr = nodeconfig.pop('stderr')
+# for daemon.open()
+# will ovewrite it if the specified pid file already exits
+class _pidfile:
+    def __enter__(self):
+        with open(self.path,'w') as f:
+            print(os.getpid(),file=f)
+        return
+    def __exit__(self):
+        pass
+    def __init__(self, pidfile_path):
+        self._is_open = False
+        self.path = pidfile_path
 
-    #   set log system
-    logger = logging.getLogger(nodename)
-    logger.setLevel(logging.INFO)
-    stimenow = time.strftime(logfiletimeformat, time.localtime())
-    logpath = logpath + "log_{}_" + nodename + ".log"
-    logfilepath = logpath.format(stimenow)
-    logfile_handler = logging.FileHandler(logfilepath)
-    #logfile_handler = logging.StreamHandler()
-    formatter = logging.Formatter(logformat)
-    logfile_handler.setFormatter(formatter)
-    logger.addHandler(logfile_handler)
-    logger.info('logger init finished')
-    #   able to record logs now
-    #   first fork
-    # does not handle error, which will be handled by parent process
-    pid = os.fork()
-    if pid != 0:
-        #   the parent(run) process
-        pid, status = os.wait()
-        exitcode = int(status >> 8)
-        logger.info('parent of #2 fork exited with {}'.format(exitcode))
-        return pid
-    #   the child(daemon) process
-    # have to record and handle errors oneself
-    # daemonize process
-    # decouple from parent environment
-    time.sleep(1)
-    try:
-        os.chdir("/tmp")
-        os.setsid()
-        os.umask(0)
-    except:
-        logger.exception('failed to decouple from parent environment')
-        exit(1)
-    logger.info('decoupled from parent environment')
-    # second fork
-    try:
-        pid = os.fork()
-    except:
-        logger.exception('failed to do second fork')
-        exit(1)
-    if pid != 0:
-        # the parent process of #2 fork
-        exit(0)
-    logger.info('daemon process forked (#2 fork)')
-    # redirect standard file descriptors
-    time.sleep(1)
-    try:
-        sys.stdout.flush()
-        sys.stderr.flush()
-        si = open(stdin, 'r')
-        so = open(stdout, 'a+')
-        se = open(stderr, 'a+')
-        os.dup2(si.fileno(), sys.stdin.fileno())
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
-    except:
-        logger.exception('failed to redirect standard file descriptors')
-        exit(1)
-    logger.info('daemonized')
-    # write ppidfile
-    # atexit.register(self.delpid)
-    #pid = str(os.getpid())
-    #file(pidfile,'w+').write("%s\n" % pid)
-    #   import mod and handler function
-    try:
-        mod = importlib.import_module("mod_" + nodetype)
-        handler_run = getattr(mod, "run")
-        handler_fix = getattr(mod, "fix")
-    except:
-        logger.exception('failed to load mod or func')
-        exit(1)
-    logger.info('loaded function handler')
-    #   wait a moment
-    try:
-        time.sleep(start_delay)
-    except:
-        logger.exception('failed to do start delay')
-    logger.info('now fork for work process')
-    #   fork for work process
-    cnt = 0
-    while cnt < repeat_time or repeat_time < 0:
-        cnt = cnt + 1
-        # fork for work func
+
+
+# return when daemonized
+# exit when error occur
+# for todo=start, main_init and daemonize main_do
+# for todo=stop, send signal_term to the main_do
+# for todo=restart, stop and then start
+
+def entry(config,todo):
+    def entry_start(config):
+        # parse config file
+        try:
+            config_daemon=config['daemon']
+            context = daemon.DaemonContex()
+            context.working_directory = \
+                config_daemon.get('working_directory','/')
+            context.umask = config_daemon.get('umask', 0o000)
+            #must specify one for sig_term
+            context.pidfile = _pidfile(config_daemon['pidfile'])
+            context.uid = config_daemon.get('uid', os.getuid)
+            context.gid = config_daemon.get('gid', os.getgid)
+            if 'stdin' in config_daemon:
+                f = open(config_daemon['stdin'],'r')
+                context.stdin = f
+            if 'stdout' in config_daemon:
+                f = open(config_daemon['stdout'],'a')
+                context.stdout = f
+            if 'stderr' in config_daemon:
+                f = open(config_daemon['stderr'],'a')
+                context.stderr = f
+        except Exception:
+            logging.exception('failed to set daemon context')
+            sys.exit(1)
+
+        context.signal_map = {
+            signal.SIGTERM : main_clean}
+        logging.info('daemon context inited')
+        main_init(config)
+        logging.info('main_init done')
         try:
             pid = os.fork()
+            assert pid != -1
         except:
-            logger.exception('failed to fork for work func')
+            logging.exception('failed to fork')
+            sys.exit(1)
+        if pid > 0:
+            logging.info('forked, the child process is expected to daemonize')
+            #parent return
+            return
+        #child daemonize
+        with context:
+            main_do(config)
 
-        # the child process
-        if pid == 0:
-            logger.info('forked for work func')
-            handler_run(nodeconfig, logger, cnt)
-            logger.warning('work func return')
-            exit(0)
-
-        # parent process
-        pid, status = os.wait()
-        exitcode = int(status >> 8)
-        logger.info('work process exited with {}'.format(exitcode))
-
-        # handle problem
-        if exitcode != 0:
-            logger.info('try to fix problems')
-            # fork for fix func
-            try:
-                pid = os.fork()
-            except:
-                logger.exception('failed to fork to fix problems')
-            if pid == 0:
-                # child
-                handler_fix(nodeconfig, logger, exitcode)
-                logger.warning('fix func return')
-                exit(0)
-            # parent
-            pid, status = os.wait()
-            exitcode = int(status >> 8)
-            logger.info('fix process exited with {}'.format(exitcode))
-            if exitcode != 0:
-                # failed to fix problem
-                logger.error('failed to fix problems')
-                break
-            else:
-                logger.info('successfully fixed problems')
-
-        logger.info('#{}: wait and restart worker'.format(cnt))
+            
+    def entry_stop(config):
+        #send sig_term and wait some time
         try:
-            time.sleep(restart_delay)
+            pidfile = config['daemon']['pidfile']
         except:
-            logger.exception('failed to do restart delay')
-            break
-    # end of while
-    logger.info('exit daemon process now')
-    exit(0)
+            logging.exception('no pidfile specified')
+            sys.exit(1)
+        if not os.path.exists(pidfile):
+            logging.warning('not running (no such pid file')
+            return
+        # the pid file exitsn
+        try:
+            with open(pidfile,'r') as f:
+                pid = f.read()
+                pid = int(pid)
+                assert pid > 0
+        except:
+            logging.exception('error getting pid from pidfile')
+            sys.exit(1)
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError as e:
+            if e.errno == errno.ESRCH:
+                logging.info('pid not running')
+            else:
+                logging.exception('failed to send signal {}'.format(pid))
+                sys.exit(1)
+        for cnt in range(0,time_term_repeat):
+            os.sleep(time_term)
+            try:
+                os.kill(pid, signal.SIGTERM)
+            except OSError as e:
+                if e.errono == errno.ESRCH:
+                    logging.info('terminated')
+                    return
+        logging.error('time out wait for terminating')
+        sys.exit(1)
+        return
+    
+    
+    if todo=='start':
+        entry_start(config)
+    elif todo=='stop':
+        entry_stop(config)
+    elif todo=='restart':
+        entry_stop(config)
+        entry_start(config)
+    else:
+        logging.error('unkown todo')
 
-import sys
-import os
-import os.path
-if __name__ == '__main__':
-    modpath = os.path.abspath(sys.argv[0])
-    modpath = os.path.dirname(modpath)
-    modpath = os.path.join(modpath, "./mods")
-    sys.path.append(modpath)
-    nodeconfig = {"nodetype": "test",
-                  "start_delay": 2,
-                  "restart_delay": 2,
-                  "repeat_time": 5,
-                  "logpath": "./__pycache__/",
-                  "logformat": "%(asctime)s - %(levelname)s - %(name)s : %(message)s",
-                  "pidfile": "/temp/project_sperm_test0.pid",
-                  "dpidfile": "/temp/project_sperm_test0d.pid",
-                  "stdout": "/dev/null",
-                  "stdin": "/dev/null",
-                  "stderr": "/dev/null",
-\
-                  "exitcode": 1, "fixexitcode": 0}
-    nodeconfig['nodename'] = 'test0'
-    daemon_start(nodeconfig)
 
-#   "test0":
-#   {
-#       "nodetype":"test",
-#       "start_delay":5,
-#       "restart_delay":5,
-#       "repeat_time":5,
-#       "logpath":"/var/log/project_sperm/",
-#       "logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
-#       "pidfile":"/temp/project_sperm_test0.pid",
-#       "dpidfile":"/temp/project_sperm_test0d.pid",
-#       "stdout":"/dev/null",
-#       "stdin":"/dev/null",
-#       "stderr":"/dev/null",
-#
-#       "exitcode":0
-#   }
