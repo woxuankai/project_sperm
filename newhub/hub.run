@@ -9,7 +9,7 @@ echo "${NOWDATE}" >> $LOGFILE
 
 WORKDIR=`dirname ${0}`
 if test ${WORKDIR[0]} != '/'; then #is not an absolute path
-    WORKDIR="$(pwd)/${workdir}";
+    WORKDIR="$(pwd)/${WORKDIR}";
 fi
 
 # redundence
@@ -37,7 +37,7 @@ done
 for ONECONFIGFILE in {maillog0,cam0,scales1}.json
 do
     echo '...starting '${ONECONFIGFILE} >>${LOGFILE} 2>&1
-    ${WORKDIR}/run.py ${WORKDIR}/config/${ONECONFIGFILE} start
+    ${WORKDIR}/run.py ${WORKDIR}'/config/'${ONECONFIGFILE} start
 done
 
 sleep 24h
@@ -45,7 +45,7 @@ sleep 24h
 for ONECONFIGFILE in  {maillog0,cam0,scales1}.json
 do
     echo '...stoping '${ONECONFIGFILE} >>${LOGFILE} 2>&1
-    ${WORKDIR}/run.py ${WORKDIR}/config/${ONECONFIGFILE} stop
+    ${WORKDIR}/run.py ${WORKDIR}'/config/'${ONECONFIGFILE} stop
 done
 
 reboot

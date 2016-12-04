@@ -7,7 +7,7 @@
     "repeat_time":-1,
     
     "filename":"/var/log/project_sperm/scales1.log",
-    "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
+    "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
     "level":"DEBUG"
 },
 "daemon":
