@@ -69,8 +69,7 @@ def entry(config,todo):
         except Exception:
             logging.exception('failed to set daemon context')
             sys.exit(1)
-
-                logging.info('daemon context inited')
+        logging.info('daemon context inited')
         try:
             pid = os.fork()
             assert pid != -1

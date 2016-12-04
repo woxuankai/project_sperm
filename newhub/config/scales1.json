@@ -1,16 +1,17 @@
+{
 "basic":
 {
     "nodetype":"scales",
-    "logpath":"/var/log/project_sperm/",
+    "logpath":"/var/log/project_sperm/scales1.log",
     "logformat":\
     "%(asctime)s - %(levelname)s - %(name)s : %(message)s"
 },
 "daemon":
 {
-    "pidfile":"/temp/project_sperm_scales1.pid",
-    "stdout":"/dev/null",
+    "pidfile":"/var/run/project_sperm_scales1.pid",
+    "stdout":"/var/log/project_sperm/scales1.stdout",
     "stdin":"/dev/null",
-    "stderr":"/dev/null"
+    "stderr":"/var/log/project_sperm/scales1.stderr"
 },
 "spec":
 {
@@ -21,4 +22,5 @@
     "baudrate":9600,
     "scalesid":1,
     "srvaddr":"http://211.83.111.245/biaoben/receive.php"
+}
 }
