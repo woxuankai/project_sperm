@@ -48,8 +48,8 @@ def entry(config,todo):
             context.umask = config_daemon.get('umask', 0o000)
             #must specify one for sig_term
             context.pidfile = _pidfile(config_daemon['pidfile'])
-            context.uid = config_daemon.get('uid', os.getuid)
-            context.gid = config_daemon.get('gid', os.getgid)
+            context.uid = config_daemon.get('uid', os.getuid())
+            context.gid = config_daemon.get('gid', os.getgid())
             if 'stdin' in config_daemon:
                 f = open(config_daemon['stdin'],'r')
                 context.stdin = f
