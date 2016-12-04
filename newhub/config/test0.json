@@ -13,10 +13,10 @@
 },
 "daemon":
 {
-    "pidfile":"/temp/project_sperm_test0.pid",
-    "stdout":"/dev/project_sperm_test0.stdout",
+    "pidfile":"/tmp/project_sperm_test0.pid",
+    "stdout":"/tmp/project_sperm_test0.stdout",
     "stdin":"/dev/null",
-    "stderr":"/temp/project_sperm_stdeer.stderr"
+    "stderr":"/tmp/project_sperm_test0.stderr"
 },
 "spec":
 {
