@@ -6,7 +6,7 @@
     "restart_delay":5,
     "repeat_time":5,
     
-    "name":"logtest0"
+    "name":"logtest0",
     "filename":"/tmp/project_sperm_test0.log",
     "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
     "level":"DEBUG"
