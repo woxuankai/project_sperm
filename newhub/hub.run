@@ -2,7 +2,7 @@
 
 NOWDATE=`date +%Y-%m-%d-%H-%M-%S`
 LOGDIR="/var/log/project_sperm"
-LOGFILE="${LOGPATH}/log_${NOWDATE}_run.log"
+LOGFILE="${LOGPATH}/${NOWDATE}_log_run.log"
 
 mkdir -p $LOGDIR
 echo "${NOWDATE}" >> $LOGFILE
@@ -24,17 +24,17 @@ echo '...installing python-daemon' >>${LOGFILE} 2>&1
 pip3 install python-daemon
 
 echo '...creating link files' >>${LOGFILE} 2>&1
-LOGFILELIST=`echo {maillog0,cam0,scales1}.{stdout,stderr,log}`
-CONFIGFILELIST=`echo {maillog0,cam0,scales1}.json`
-for ONELOGFILE in FILELIST
+ 
+
+for ONELOGFILE in {maillog0,cam0,scales1}.{stdout,stderr,log}
 do
-    NEWLOGFILE=${LOGDIR}'/'${NOWDATE}${ONELOGFILE}
+    NEWLOGFILE=${LOGDIR}'/'${NOWDATE}'_'${ONELOGFILE}
     LINKFILE=${LOGDIR}'/'${ONELOGFILE}
     touch ${NEWLOGFILE}
     ln -sf ${NEWLOGFILE} ${LINKFILE}
 done
 
-for ONECONFIGFILE in CONFIGFILELIST
+for ONECONFIGFILE in {maillog0,cam0,scales1}.json
 do
     echo '...starting '${ONECONFIGFILE} >>${LOGFILE} 2>&1
     ${WORKDIR}/run.py ${WORKDIR}/config/${ONECONFIGFILE} start
