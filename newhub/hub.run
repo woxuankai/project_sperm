@@ -4,7 +4,7 @@ NOWDATE=`date +%Y-%m-%d-%H-%M-%S`
 LOGDIR="/var/log/project_sperm"
 LOGFILE="${LOGPATH}/log_${NOWDATE}_run.log"
 
-mkdir -p $LOGPATH
+mkdir -p $LOGDIR
 echo "${NOWDATE}" >> $LOGFILE
 
 WORKDIR=`dirname ${0}`
