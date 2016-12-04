@@ -1,1 +1,4 @@
 all file in the directory will be considered as one config file for one node, except those start with '.' or '~'
+part "daemon" is used in entry and daemon
+part "basic" is used in main_job
+part "spec" will be passed to a loaded daemon

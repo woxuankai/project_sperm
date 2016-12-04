@@ -56,7 +56,10 @@ def entry(config,todo):
                 f = open(config_daemon['stdout'],'a')
                 context.stdout = f
             if 'stderr' in config_daemon:
-                f = open(config_daemon['stderr'],'a')
+                if ('stdout' not in config_daemon) \
+                   or (config_deamon['stdout'] != config_daemon['stderr']):
+                    # in prevention of open the same file twice
+                    f = open(config_daemon['stderr'],'a')
                 context.stderr = f
         except Exception:
             logging.exception('failed to set daemon context')
@@ -65,8 +68,6 @@ def entry(config,todo):
         context.signal_map = {
             signal.SIGTERM : main_clean}
         logging.info('daemon context inited')
-        main_init(config)
-        logging.info('main_init done')
         try:
             pid = os.fork()
             assert pid != -1
@@ -77,9 +78,13 @@ def entry(config,todo):
             logging.info('forked, the child process is expected to daemonize')
             #parent return
             return
-        #child daemonize
-        with context:
-            main_do(config)
+        #child init and daemonize
+        try:
+            main_init(config)
+            with context:
+                main_do(config)
+        except:
+            logging.exception('some thing wrong in child process')
 
             
     def entry_stop(config):
@@ -131,5 +136,3 @@ def entry(config,todo):
         entry_start(config)
     else:
         logging.error('unkown todo')
-
-

@@ -4,16 +4,18 @@
     "start_delay":50,
     "restart_delay":5,
     "repeat_time":5,
-    "logpath":"/tmp/",
-    "logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
+    
+    "name":"logtest0"
+    "filename":"/tmp/project_sperm_test0.log",
+    "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
+    "level":"DEBUG"
 },
 "daemon":
 {
     "pidfile":"/temp/project_sperm_test0.pid",
-    "dpidfile":"/temp/project_sperm_test0d.pid",
-    "stdout":"/dev/null",
+    "stdout":"/dev/project_sperm_test0.stdout",
     "stdin":"/dev/null",
-    "stderr":"/dev/null"
+    "stderr":"/temp/project_sperm_stdeer.stderr"
 },
 "spec":
 {
