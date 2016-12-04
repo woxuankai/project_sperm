@@ -42,7 +42,7 @@ def entry(config,todo):
         # parse config file
         try:
             config_daemon=config['daemon']
-            context = daemon.DaemonContex()
+            context = daemon.DaemonContext()
             context.working_directory = \
                 config_daemon.get('working_directory','/')
             context.umask = config_daemon.get('umask', 0o000)
