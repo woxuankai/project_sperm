@@ -1,3 +1,4 @@
+{
 "basic":
 {
     "nodetype":"test",
@@ -7,7 +8,7 @@
     
     "name":"logtest0"
     "filename":"/tmp/project_sperm_test0.log",
-    "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
+    "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
     "level":"DEBUG"
 },
 "daemon":
@@ -20,4 +21,5 @@
 "spec":
 {
     "exitcode":1
+}
 }
