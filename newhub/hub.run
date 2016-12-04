@@ -1,3 +1,5 @@
+mkdir -p $LOGDIR
+echo "${NOWDATE}" >> $LOGFILE
 #!/bin/sh
 
 NOWDATE=`date +%Y-%m-%d-%H-%M-%S`
@@ -8,7 +10,7 @@ mkdir -p $LOGDIR
 echo "${NOWDATE}" >> $LOGFILE
 
 WORKDIR=`dirname ${0}`
-if test ${WORKDIR[0]} != '/'; then #is not an absolute path
+if test ${WORKDIR:0:1} != '/'; then #is not an absolute path
     WORKDIR="$(pwd)/${WORKDIR}";
 fi
 
