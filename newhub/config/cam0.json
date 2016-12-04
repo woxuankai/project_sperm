@@ -1,6 +1,11 @@
+{
 "basic":
 {
     "nodetype":"cam",
+    "start_delay":15,
+    "restart_delay":550,
+    "repeat_time":-1,
+
     "logpath":"/var/log/project_sperm/log_cam0.log",
     "logformat":"%(asctime)s - %(levelname)s - %(name)s : %(message)s"
 },
@@ -13,11 +18,9 @@
 },
 "spec":
 {
-    "start_delay":15,
-    "restart_delay":550,
-    "repeat_time":-1,
     "addr":"http://211.83.111.245/biaoben/img_receive.php",
     "imgfilepath":"/tmp/img_cam0.jpg",
     "videodevice":"/dev/video0",
     "resolution":[1280,720]
+}
 }
