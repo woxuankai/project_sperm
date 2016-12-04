@@ -9,6 +9,7 @@ import os
 import os.path
 import time
 import logging
+import errno
 from main_job import main_do, main_clean, main_init
 
 #time waiting for a process to terminate after send sigterm
@@ -85,6 +86,7 @@ def entry(config,todo):
             with context:
                 main_do(config)
         except Exception as e:
+            logging.info('#############################')
             if (type(e) == SystemExit) or (e.code != 0):
                 logging.exception(\
                     'something wrong with child or grandchild')
