@@ -96,7 +96,7 @@ def run(config, logger, cnt):
         for onedir in logspath:
             for onefile in os.listdir(onedir):
                 onefile = os.path.join(onedir, onefile)
-                if os.path.isfile(onefile):
+                if os.path.isfile(onefile) and not os.path.islink(onefile):
                     logfiles.add(onefile)
         oldfiles = pick_old_files(logfiles, time_delete)
     except:

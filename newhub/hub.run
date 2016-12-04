@@ -1,19 +1,52 @@
 #!/bin/sh
 
-nowdate=`date +%Y-%m-%d-%H-%M-%S`
-logpath="/var/log/project_sperm"
-logfile="${logpath}/log_${nowdate}_run.log"
-errlogfile="${logpath}/logerr_${nowdate}_run.log"
-mkdir -p $logpath
-echo "${nowdate}" >> $logfile
+NOWDATE=`date +%Y-%m-%d-%H-%M-%S`
+LOGDIR="/var/log/project_sperm"
+LOGFILE="${LOGPATH}/log_${NOWDATE}_run.log"
+
+mkdir -p $LOGPATH
+echo "${NOWDATE}" >> $LOGFILE
+
 WORKDIR=`dirname ${0}`
 if test ${WORKDIR[0]} != '/'; then #is not an absolute path
     WORKDIR="$(pwd)/${workdir}";
 fi
-${WORKDIR}/wait_reboot.sh 24h  >> ${logfile} 2>&1 &
-#python3 ./run.py ./config.json start maillog  >> ${logfile} 2>&1 &
-#python3 ./run.py ./config.json start maillog cam0 scales1>> ${logfile} 2>&1 &
-${WORKDIR}/run.py ${WORKDIR}/config/maillog1.json start 1>>/dev/null 2>>${errlogfile} &
-${WORKDIR}/run.py ${WORKDIR}/config/cam0.json     start 1>>/dev/null 2>>${errlogfile} &
-${WORKDIR}/run.py ${WORKDIR}/config/scale1.json   start 1>>/dev/null 2>>${errlogfile} &
+
+# redundence
+echo '...redundant reboot prepare' >>${LOGFILE} 2>&1
+${WORKDIR}/wait_reboot.sh 30h  >>${LOGFILE} 2>&1 0</dev/zero &
+
+echo '...update project_sperm_d.run' >>${LOGFILE} 2>&1
+cp ${WORKDIR}/project_sperm_d.run  ${WORKDIR}/../../project_sperm_d.run
+
+#start all
+echo '...installing python-daemon' >>${LOGFILE} 2>&1
+pip3 install python-daemon
+
+echo '...creating link files' >>${LOGFILE} 2>&1
+LOGFILELIST=`echo {maillog0,cam0,scales1}.{stdout,stderr,log}`
+CONFIGFILELIST=`echo {maillog0,cam0,scales1}.json`
+for ONELOGFILE in FILELIST
+do
+    NEWLOGFILE=${LOGDIR}'/'${NOWDATE}${ONELOGFILE}
+    LINKFILE=${LOGDIR}'/'${ONELOGFILE}
+    touch ${NEWLOGFILE}
+    ln -sf ${NEWLOGFILE} ${LINKFILE}
+done
+
+for ONECONFIGFILE in CONFIGFILELIST
+do
+    echo '...starting '${ONECONFIGFILE} >>${LOGFILE} 2>&1
+    ${WORKDIR}/run.py ${WORKDIR}/config/${ONECONFIGFILE} start
+done
+
+sleep 24h
+
+for ONECONFIGFILE in CONFIGFILELIST
+do
+    echo '...stoping '${ONECONFIGFILE} >>${LOGFILE} 2>&1
+    ${WORKDIR}/run.py ${WORKDIR}/config/${ONECONFIGFILE} stop
+done
+
+reboot
 exit 0

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#this is the run daemon
+#can be placed out of the project folder as bootloader
+sleep 300
+PROJECT_HOME=/opt/project_sperm
+nowdate=`date +%Y-%m-%d-%H-%M-%S`
+logpath="/var/log/project_sperm"
+logfile="${logpath}/log_${nowdate}_rund.log"
+mkdir -p $logpath
+echo "${nowdate}" >> $logfile
+#update program
+git -C ${PROJECT_HOME} reset --hard
+git -C ${PROJECT_HOME} pull origin master >> ${logfile} 2>&1
+#run
+${PROJECT_HOME}/newhub/hub.run >>${logfile} 2>&1 0</dev/zero
+exit 0
