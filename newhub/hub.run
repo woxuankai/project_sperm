@@ -1,5 +1,3 @@
-mkdir -p $LOGDIR
-echo "${NOWDATE}" >> $LOGFILE
 #!/bin/sh
 
 NOWDATE=`date +%Y-%m-%d-%H-%M-%S`
