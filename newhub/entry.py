@@ -123,11 +123,11 @@ def entry(config,todo):
                 logging.exception('failed to send signal {}'.format(pid))
                 sys.exit(1)
         for cnt in range(0,term_wait_repeat):
-            time.sleep(time_term)
+            time.sleep(term_wait)
             try:
                 os.kill(pid, signal.SIGTERM)
             except OSError as e:
-                if e.errono == errno.ESRCH:
+                if e.errno == errno.ESRCH:
                     logging.info('terminated')
                     return
         logging.error('time out wait for terminating')
