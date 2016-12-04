@@ -2,7 +2,7 @@
 "basic":
 {
     "nodetype":"test",
-    "start_delay":50,
+    "start_delay":5,
     "restart_delay":5,
     "repeat_time":5,
     

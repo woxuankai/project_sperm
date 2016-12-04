@@ -23,7 +23,7 @@ class _pidfile:
         with open(self.path,'w') as f:
             print(os.getpid(),file=f)
         return
-    def __exit__(self):
+    def __exit__(self,exc_type, exc_val, exc_tb):
         pass
     def __init__(self, pidfile_path):
         self._is_open = False
