@@ -19,13 +19,16 @@
 },
 "spec":
 {
-    "account":"one_mail_addr@163.com",
-    "passwd":"1authcode",
-    "server":"smtp.163.com",
-    "server_port":25,
-    "encryption":false,
-    "from_addr":"one_mail_addr@163.com",
-    "to_addrs":["woxuankai@gmail.com"],
+    "email":
+    {
+	"account":"one_mail_addr@163.com",
+	"passwd":"1authcode",
+	"server":"smtp.163.com",
+	"server_port":25,
+	"encryption":false,
+	"from_addr":"one_mail_addr@163.com",
+	"to_addrs":["woxuankai@gmail.com"]
+    },
     "time_delete":11101,
     "ifsend":true,
     "logspath":["/var/log/project_sperm/"]
