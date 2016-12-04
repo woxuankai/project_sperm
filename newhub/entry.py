@@ -58,7 +58,7 @@ def entry(config,todo):
                 context.stdout = f
             if 'stderr' in config_daemon:
                 if ('stdout' not in config_daemon) \
-                   or (config_deamon['stdout'] != config_daemon['stderr']):
+                   or (config_daemon['stdout'] != config_daemon['stderr']):
                     # in prevention of open the same file twice
                     f = open(config_daemon['stderr'],'a')
                 context.stderr = f
