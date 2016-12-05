@@ -89,7 +89,7 @@ class main_job:
             # parent process
             pid, status = os.wait()
             exitcode = int(status >> 8)
-            if exitcode == 0:
+            if exitcode != 0:
                 logger.warning('return code {}'.format(exitcode))
             logger.info('work process exited with {}'.format(exitcode))
 
