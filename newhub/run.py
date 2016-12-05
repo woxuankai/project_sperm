@@ -12,10 +12,11 @@ mods_dir='./mods'
 
 if __name__ == '__main__':
     # slove path problems
-    logging.basicConfig(level=logging.DEBUG)
-    logging.info('########################################')
-    logging.info('############ WELCOME !!!!!!! ###########')
-    logging.info('########################################')
+    logger = logging.getLogger('root')
+    logger.basicConfig(level=logging.DEBUG)
+    logger.info('########################################')
+    logger.info('############ WELCOME !!!!!!! ###########')
+    logger.info('########################################')
     try:
         node2start = sys.argv.copy()
         if len(node2start) < 3:
@@ -34,25 +35,26 @@ if __name__ == '__main__':
         # argument 2 - what to do? start|stop|restart
         todo = node2start.pop(0)  # under development
     except Exception:
-        logging.exception("\
+        logger.exception("\
 usage: run.py configfile start|stop|restart")
         exit(1)
 
     # load config file
-    logging.info('loading config file...')
+    logger.info('loading config file...')
     try:
         config = getconfig(configfilepath)
         config_basic = config['basic'].copy()
         config_daemon = config['daemon'].copy()
         config_spec = config['spec'].copy()
     except Exception:
-        logging.exception('fail to load config file: ' + configfilepath)
+        logger.exception('fail to load config file: ' + configfilepath)
         exit(1)
-    logging.info('passing arguments to entry...')
+    logger.info('passing arguments to entry...')
     try:
         entry(config,todo)
     except Exception:
-        logging.exception('failed to start entry')
+        logger.exception('failed to start entry')
         exit(1)
-    logging.info('returned from entry, exit now')
+    logger.info('returned from entry, exit now')
+    logger.info('################  end  ##################')
     exit(0)

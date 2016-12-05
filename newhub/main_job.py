@@ -19,10 +19,15 @@ def initlogger(config_basic):
     defaultlogformat = '%(asctime)s - %(levelname)s : %(message)s'
     #defaultlogformat = '%(asctime)s - %(levelname)s - %(name)s : %(message)s'
     # only root logger writes to logfile
+    logging.info('...setting logger in main_job')
+    logfilename = config_basic['filename'] # must specify one
+    loglevel    = leveldict[config_basic.get('level','WARNING')]
+    logformat    = config_basic.get('format',defaultlogformat)
+    logging.info("filename: {}, level: {}".format(logfilename,loglevel))
     logging.basicConfig(
-        filename = config_basic['filename'], # must specify one
-        level    = leveldict[config_basic.get('level','WARNING')],
-        format   = config_basic.get('format',defaultlogformat))
+        filename = logfilename
+        level    = loglevel
+        format   = logformat)
     #logger = logging.getLogger(configbasic.get('name','defaultname'))
     #logger = logging.getLogger()
     #logger.info('logger init finished')

@@ -23,8 +23,10 @@ class _pidfile:
     def __enter__(self):
         with open(self.path,'w') as f:
             print(os.getpid(),file=f)
+        self._is_open = True
         return
     def __exit__(self,exc_type, exc_val, exc_tb):
+        self._is_open = False
         pass
     def __init__(self, pidfile_path):
         self._is_open = False
@@ -39,6 +41,10 @@ class _pidfile:
 # for todo=restart, stop and then start
 
 def entry(config,todo):
+    config_basic = config.get('basic',{'name':'default'})
+    loggername = config_basic.get('name','default')
+    loggername = 'entry.' + loggername
+    logger = logging.getLogger(loggername)
     def entry_start(config):
         # parse config file
         try:
@@ -67,17 +73,17 @@ def entry(config,todo):
             #use default map
             #main_clean has to receive 'config', to be completed in ohter way
         except Exception:
-            logging.exception('failed to set daemon context')
+            logger.exception('failed to set daemon context')
             sys.exit(1)
-        logging.info('daemon context inited')
+        logger.info('daemon context inited')
         try:
             pid = os.fork()
-            assert pid != -1
+            assert pid >= 0
         except:
-            logging.exception('failed to fork')
+            logger.exception('failed to fork')
             sys.exit(1)
         if pid > 0:
-            logging.info('forked, the child process is expected to daemonize')
+            logger.info('forked, the child process is expected to daemonize')
             #parent return
             return
         #child init and daemonize
@@ -86,12 +92,12 @@ def entry(config,todo):
             with context:
                 main_do(config)
         except Exception as e:
-            logging.info('#############################')
             if (type(e) != SystemExit) or (e.code != 0):
-                logging.exception(\
+                logger.exception(\
                     'something wrong with child or grandchild')
             else:
-                logging.info('exited with 0')
+                logger.info('exited with 0')
+            return
         sys.exit(1)
 
             
@@ -100,10 +106,10 @@ def entry(config,todo):
         try:
             pidfile = config['daemon']['pidfile']
         except:
-            logging.exception('no pidfile specified')
+            logger.exception('no pidfile specified')
             sys.exit(1)
         if not os.path.exists(pidfile):
-            logging.warning('not running (no such pid file')
+            logger.warning('not running (no such pid file')
             return
         # the pid file exitsn
         try:
@@ -112,15 +118,15 @@ def entry(config,todo):
                 pid = int(pid)
                 assert pid > 0
         except:
-            logging.exception('error getting pid from pidfile')
+            logger.exception('error getting pid from pidfile')
             sys.exit(1)
         try:
             os.kill(pid, signal.SIGTERM)
         except OSError as e:
             if e.errno == errno.ESRCH:
-                logging.info('pid not running')
+                logger.info('pid not running')
             else:
-                logging.exception('failed to send signal {}'.format(pid))
+                logger.exception('failed to send signal {}'.format(pid))
                 sys.exit(1)
         for cnt in range(0,term_wait_repeat):
             time.sleep(term_wait)
@@ -128,11 +134,10 @@ def entry(config,todo):
                 os.kill(pid, signal.SIGTERM)
             except OSError as e:
                 if e.errno == errno.ESRCH:
-                    logging.info('terminated')
+                    logger.info('terminated')
                     return
-        logging.error('time out wait for terminating')
+        logger.error('time out wait for terminating')
         sys.exit(1)
-        return
     
     
     if todo=='start':
@@ -143,4 +148,7 @@ def entry(config,todo):
         entry_stop(config)
         entry_start(config)
     else:
-        logging.error('unkown todo')
+        logger.error('unkown todo')
+        #raise AttributeError('start|stop|restart')
+        sys.exit(1)
+    return
