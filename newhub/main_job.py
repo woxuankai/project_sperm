@@ -32,6 +32,8 @@ def initlogger(config_basic):
     formatter = logging.Formatter(logformat)
     filehandler.setFormatter(formatter)
     logger.addHandler(filehandler)
+    #set logging level to warning in prevention of too much 
+    #logging.basicConfig(level = logging.WARNING)
     return logger
 
 
