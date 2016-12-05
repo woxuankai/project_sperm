@@ -76,8 +76,6 @@ def entry(config,todo):
             logger.exception('failed to set daemon context')
             sys.exit(1)
         logger.info('daemon context inited')
-        # clean
-        do_it = main_job(config)
 
         try:
             pid = os.fork()
@@ -92,6 +90,7 @@ def entry(config,todo):
         #child init and daemonize
         try:
             with context:
+                do_it = main_job(config)
                 with do_it:
                     pass
         except Exception as e:
