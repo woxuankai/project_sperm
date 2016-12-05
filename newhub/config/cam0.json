@@ -15,7 +15,7 @@
     "pidfile":"/var/run/project_sperm_cam0.pid",
     "stdout":"/dev/null",
     "stdin":"/dev/null",
-    "stderr":"/var/null"
+    "stderr":"/var/log/project_sperm/log_cam0.stderr"
 },
 "spec":
 {

@@ -13,7 +13,7 @@
 "daemon":
 {
     "pidfile":"/var/run/project_sperm_maillog0.pid",
-    "stdout":"/var/log/project_sperm/maillog0.stdout",
+    "stdout":"/dev/null",
     "stdin":"/dev/null",
     "stderr":"/var/log/project_sperm/maillog0.stderr"
 },
@@ -27,7 +27,7 @@
 	"server_port":25,
 	"encryption":false,
 	"from_addr":"one_mail_addr@163.com",
-	"to_addrs":["woxuankai@gmail.com"]
+	"to_addrs":["one_mail_addr@163.com"]
     },
     "time_delete":11101,
     "ifsend":true,

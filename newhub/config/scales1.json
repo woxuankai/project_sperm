@@ -13,7 +13,7 @@
 "daemon":
 {
     "pidfile":"/var/run/project_sperm_scales1.pid",
-    "stdout":"/var/log/project_sperm/scales1.stdout",
+    "stdout":"/dev/null",
     "stdin":"/dev/null",
     "stderr":"/var/log/project_sperm/scales1.stderr"
 },

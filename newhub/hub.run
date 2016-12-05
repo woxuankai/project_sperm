@@ -21,13 +21,14 @@ echo '...update project_sperm_d.run'
 cp ${WORKDIR}/project_sperm_d.run  ${WORKDIR}/../../project_sperm_d.run
 
 #start all
-echo '...installing python-daemon' 
-pip3 install python-daemon
+#echo '...installing python-daemon' 
+#pip3 install python-daemon
 
 echo '...creating link files'
  
 
-for ONELOGFILE in {maillog0,cam0,scales1}.{stdout,stderr,log}
+#for ONELOGFILE in {maillog0,cam0,scales1}.{stdout,stderr,log}
+for ONELOGFILE in {maillog0,cam0,scales1}.{stderr,log}
 do
     NEWLOGFILE=${LOGDIR}'/'${NOWDATE}'_'${ONELOGFILE}
     LINKFILE=${LOGDIR}'/'${ONELOGFILE}
