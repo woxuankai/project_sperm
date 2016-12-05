@@ -10,7 +10,7 @@ import os.path
 import time
 import logging
 import errno
-from main_job import main_do, main_clean, main_init
+from main_job import main_job
 
 #time waiting for a process to terminate after send sigterm
 term_wait = 0.5
@@ -76,6 +76,9 @@ def entry(config,todo):
             logger.exception('failed to set daemon context')
             sys.exit(1)
         logger.info('daemon context inited')
+        # clean
+        do_it = main_job(config)
+
         try:
             pid = os.fork()
             assert pid >= 0
@@ -88,9 +91,9 @@ def entry(config,todo):
             return
         #child init and daemonize
         try:
-            main_init(config)
             with context:
-                main_do(config)
+                with do_it:
+                    pass
         except Exception as e:
             if (type(e) != SystemExit) or (e.code != 0):
                 logger.exception(\

@@ -12,11 +12,11 @@ mods_dir='./mods'
 
 if __name__ == '__main__':
     # slove path problems
+    logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger('root')
-    logger.basicConfig(level=logging.DEBUG)
-    logger.info('########################################')
-    logger.info('############ WELCOME !!!!!!! ###########')
-    logger.info('########################################')
+    logger.info('#########################################')
+    logger.info('############# WELCOME !!!!!!! ###########')
+    logger.info('#########################################')
     try:
         node2start = sys.argv.copy()
         if len(node2start) < 3:

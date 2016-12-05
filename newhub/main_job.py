@@ -7,6 +7,8 @@ import sys
 import time
 import os
 
+
+
 def initlogger(config_basic):
     leveldict = {
         'CRITICAL' : logging.CRITICAL,
@@ -15,94 +17,108 @@ def initlogger(config_basic):
         'INFO'     : logging.INFO,
         'DEBUG'    : logging.DEBUG,
         'NOTSET'   : logging.NOTSET}
-    #as only root logger is used, we discard logger name
-    defaultlogformat = '%(asctime)s - %(levelname)s : %(message)s'
-    #defaultlogformat = '%(asctime)s - %(levelname)s - %(name)s : %(message)s'
-    # only root logger writes to logfile
+    defaultlogformat = \
+        '%(asctime)s - %(levelname)s - %(name)s : %(message)s'
     logging.info('...setting logger in main_job')
     logfilename = config_basic['filename'] # must specify one
     loglevel    = leveldict[config_basic.get('level','WARNING')]
     logformat    = config_basic.get('format',defaultlogformat)
     logging.info("filename: {}, level: {}".format(logfilename,loglevel))
-    logging.basicConfig(
-        filename = logfilename
-        level    = loglevel
-        format   = logformat)
-    #logger = logging.getLogger(configbasic.get('name','defaultname'))
-    #logger = logging.getLogger()
-    #logger.info('logger init finished')
-    #return logger
+    name = config_basic.get('name','default')
+    name = 'main_job.' + name
+    logger = logging.getLogger(name)
+    logger.setLevel(loglevel)
+    filehandler = logging.FileHandler(logfilename)
+    formatter = logging.Formatter(logformat)
+    filehandler.setFormatter(formatter)
+    logger.addHandler(filehandler)
+    return logger
 
 
-def main_clean(config):
-    logging.info('here is main_clean')
-    pass
 
-#clean and init logger
-def main_init(config):
-    logging.info('here is main_init')
-    initlogger(config['basic'])
-    main_clean(config)
+class main_job:
+    
+    def main_clean(self):
+        pass
 
     # the main job to do
-def main_do(config):
-    logger = logging.getLogger()
-    try:
-        start_delay   = config['basic']['start_delay']
-        repeat_time   = config['basic']['repeat_time']
-        restart_delay = config['basic']['restart_delay']
-        nodeconfig    = config['spec']
-    except:
-        logger.exception('failed to parse config')
-        sys.exit(1)
-    try:
-        mod = importlib.import_module("mod_" + config['basic']['nodetype'])
-        handler_run = getattr(mod, "run")
-        handler_fix = getattr(mod, "fix")
-    except:
-        logger.exception('failed to load mod or func')
-        sys.exit(1)
-    logger.info('ready to start')
-    #   wait a moment
-    try:
-        time.sleep(start_delay)
-    except:
-        logger.exception('failed to do start delay')
-        sys.exit(1)
-    logger.info('now fork for work process')
-    #   fork for work process
-    cnt = 0
-    while cnt < repeat_time or repeat_time < 0:
-        cnt = cnt + 1
-        # fork for work func
+    def main_do(self):
+        config = self.config
+        logger = self.logger
         try:
-            pid = os.fork()
-            assert pid >= 0
+            start_delay   = config['basic']['start_delay']
+            repeat_time   = config['basic']['repeat_time']
+            restart_delay = config['basic']['restart_delay']
+            nodeconfig    = config['spec']
         except:
-            logger.exception('failed to fork for work func')
-        # the child process
-        if pid == 0:
-            logger.info('forked for work func')
-            handler_run(nodeconfig, logger, cnt)
-            logger.warning('work func return')
-            sys.exit(0)# without this exit, 1-2-4-8...will happen
-
-        # parent process
-        pid, status = os.wait()
-        exitcode = int(status >> 8)
-        if exitcode == 0:
-            logger.warning('return code {}'.format(exitcode))
-        logger.info('work process exited with {}'.format(exitcode))
-
-        logger.info('#{}: wait and restart worker'.format(cnt))
+            logger.exception('failed to parse config')
+            sys.exit(1)
         try:
-            time.sleep(restart_delay)
+            mod = importlib.import_module(\
+                "mod_" + config['basic']['nodetype'])
+            handler_run = getattr(mod, "run")
+            handler_fix = getattr(mod, "fix")
         except:
-            logger.exception('failed to do restart delay')
-            break
-    # end of while
-    logger.info('exit daemon process now')
-    exit(0)
+            logger.exception('failed to load mod or func')
+            sys.exit(1)
+        logger.info('ready to start')
+        #   wait a moment
+        try:
+            time.sleep(start_delay)
+        except:
+            logger.exception('failed to do start delay')
+            sys.exit(1)
+        logger.info('now fork for work process')
+        #   fork for work process
+        cnt = 0
+        while cnt < repeat_time or repeat_time < 0:
+            cnt = cnt + 1
+            # fork for work func
+            try:
+                pid = os.fork()
+                assert pid >= 0
+            except:
+                logger.exception('failed to fork for work func')
+            # the child process
+            if pid == 0:
+                logger.info('forked for work func')
+                handler_run(nodeconfig, logger, cnt)
+                logger.warning('work func return')
+                sys.exit(0)# without this exit, 1-2-4-8...will happen
+
+            # parent process
+            pid, status = os.wait()
+            exitcode = int(status >> 8)
+            if exitcode == 0:
+                logger.warning('return code {}'.format(exitcode))
+            logger.info('work process exited with {}'.format(exitcode))
+
+            logger.info('#{}: wait and restart worker'.format(cnt))
+            try:
+                time.sleep(restart_delay)
+            except:
+                logger.exception('failed to do restart delay')
+                break
+        # end of while
+        logger.info('exit daemon process now')
+        exit(0)
+
+    def start(self):
+        self.main_clean()
+        self.main_do()
+    def stop(self):
+        self.main_clean()
+   
+    def __init__(self, config):
+        self.config = config
+        self.logger = initlogger(config['basic'])
+        
+    def __enter__(self):
+        self.start()
+        
+    def __exit__(self,exc_type, exc_val, exc_tb):
+        self.stop()
+        
 
 
 #import sys
