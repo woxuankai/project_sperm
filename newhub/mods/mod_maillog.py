@@ -88,7 +88,7 @@ def run(config, logger, cnt):
         emailconfig = config['email']
         assert(type(emailconfig) == dict)
         send_interval = config['send_interval']
-        assert(type(send_interval)) == int)
+        assert(type(send_interval) == int)
         assert(send_interval >= 0)
     except:
         logger.exception('missing config para or of wrong format')
