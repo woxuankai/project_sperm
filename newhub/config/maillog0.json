@@ -32,6 +32,6 @@
     "time_delete":11101,
     "ifsend":true,
     "logspath":["/var/log/project_sperm/"],
-    "send_interval":67
+    "send_interval":217
 }
 }
