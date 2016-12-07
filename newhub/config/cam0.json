@@ -7,7 +7,7 @@
     "repeat_time":-1,
 
     "name":"cam0",
-    "filename":"/var/log/project_sperm/log_cam0.log",
+    "filename":"/var/log/project_sperm/cam0.log",
     "format":"%(asctime)s - %(levelname)s - %(name)s : %(message)s",
     "level":"DEBUG"
 },
@@ -16,7 +16,7 @@
     "pidfile":"/var/run/project_sperm_cam0.pid",
     "stdout":"/dev/null",
     "stdin":"/dev/null",
-    "stderr":"/var/log/project_sperm/log_cam0.stderr"
+    "stderr":"/var/log/project_sperm/cam0.stderr"
 },
 "spec":
 {
