@@ -31,9 +31,11 @@ def initlogger(config_basic):
     filehandler = logging.FileHandler(logfilename)
     formatter = logging.Formatter(logformat)
     filehandler.setFormatter(formatter)
-    #logger.addHandler(filehandler)
-    #set file handler to root so there will be no extra message in stderr
-    logging.getLogger('root').addHandler(filehandler)
+    logger.addHandler(filehandler)
+    #prevent logger from propagating to parent
+    logger.propagate = False
+    ##set file handler to root so there will be no extra message in stderr
+    #logging.getLogger('root').addHandler(filehandler)
     #set logging level to warning in prevention of too much 
     #logging.basicConfig(level = logging.WARNING)
     return logger
