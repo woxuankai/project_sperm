@@ -6,8 +6,8 @@ import importlib
 import sys
 import time
 import os
-
-
+import signal
+import errno
 
 def initlogger(config_basic):
     leveldict = {
@@ -41,6 +41,19 @@ def initlogger(config_basic):
     return logger
 
 
+#def killwait(interval, maxcnt) -> bool:
+#    """kill-wait loop until it die
+#delay 
+
+# Main job will fork a child to do main work and the sleep.
+# When parent is awake but child still hasn't exited,
+# it will try to kill the child process.
+# Each kill happens between each wait(sec)
+# and wait for at most maxwait times.
+# Child process still not exit now?
+# Parent process exits 1 then.
+maxwait = 20
+eachwait = 0.25
 
 class main_job:
     
@@ -90,22 +103,38 @@ class main_job:
                 logger.info('forked for work func')
                 handler_run(nodeconfig, logger, cnt)
                 logger.warning('work func return')
-                sys.exit(0)# without this exit, 1-2-4-8...will happen
+                sys.exit(0)# ensure 1-2-4-8...will not happen
 
             # parent process
-            pid, status = os.wait()
-            exitcode = int(status >> 8)
-            if exitcode != 0:
-                logger.warning('return code {}'.format(exitcode))
-            logger.info('work process exited with {}'.format(exitcode))
-
-            logger.info('#{}: wait and restart worker'.format(cnt))
+            #logger.info('#{}: sleep now'.format(cnt))
             try:
                 time.sleep(restart_delay)
             except:
                 logger.exception('failed to do restart delay')
                 break
+            pidwait, status = os.waitpid(pid, pid, os.WNOHANG)
+            if pidwait != pid:
+                #child process still not finished???
+                logger.warning('parent awake now, but child havn\'t exited')
+            for waitcnt in range(0, maxwait) and pidwait == 0:
+                try:
+                    os.kill(pid, signal.SIGTERM)
+                except Exception as e:
+                    if type(e) == OSError and e.errno == errno.ESRCH:
+                        break
+                time.sleep(eachwait)
+            pidwait, status = os.waitpid(pid, os.WNOHANG)
+            if pidwait == pid:
+                exitcode = int(status >> 8)
+                if exitcode != 0:
+                    logger.warning('work process exited {}'.format(exitcode))
+                else:
+                    logger.info('work process exited 0')
+            else:
+                logging.error('failed to terminate work process')
+                sys.exit(1)
         # end of while
+        
         logger.info('exit daemon process now')
         exit(0)
 

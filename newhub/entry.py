@@ -138,6 +138,7 @@ def entry(config,todo):
             except OSError as e:
                 if e.errno == errno.ESRCH:
                     logger.info('terminated')
+                    # the parent will exit, so don't have to wait()
                     return
         logger.error('time out wait for terminating')
         sys.exit(1)
