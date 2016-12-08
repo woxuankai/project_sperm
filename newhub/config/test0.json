@@ -3,7 +3,7 @@
 {
     "nodetype":"test",
     "start_delay":5,
-    "restart_delay":5,
+    "restart_delay":10,
     "repeat_time":5,
     
     "name":"test0",
@@ -20,6 +20,7 @@
 },
 "spec":
 {
-    "exitcode":1
+    "exitcode":1,
+    "wait":5
 }
 }

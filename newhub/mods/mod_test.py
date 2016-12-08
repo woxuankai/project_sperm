@@ -6,8 +6,8 @@ import logging
 import os
 
 def run(config, logger, cnt):
-    time.sleep(2)
     logger.info('#{} hello, this is a test mod'.format(cnt))
+    time.sleep(config['wait'])
     logger.info(str(config))
     logger.info('pid: {}'.format(os.getpid()))
     if 'exitcode' in config:

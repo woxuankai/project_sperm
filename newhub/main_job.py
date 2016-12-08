@@ -112,18 +112,21 @@ class main_job:
             except:
                 logger.exception('failed to do restart delay')
                 break
-            pidwait, status = os.waitpid(pid, pid, os.WNOHANG)
+            pidwait, status = os.waitpid(pid, os.WNOHANG)
             if pidwait != pid:
                 #child process still not finished???
                 logger.warning('parent awake now, but child havn\'t exited')
-            for waitcnt in range(0, maxwait) and pidwait == 0:
-                try:
-                    os.kill(pid, signal.SIGTERM)
-                except Exception as e:
-                    if type(e) == OSError and e.errno == errno.ESRCH:
+                logger.info('try to kill it')
+                for waitcnt in range(0, maxwait):
+                    if pidwait != 0:
                         break
-                time.sleep(eachwait)
-            pidwait, status = os.waitpid(pid, os.WNOHANG)
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                    except Exception as e:
+                        if type(e) == OSError and e.errno == errno.ESRCH:
+                            break
+                    time.sleep(eachwait)
+                pidwait, status = os.waitpid(pid, os.WNOHANG)
             if pidwait == pid:
                 exitcode = int(status >> 8)
                 if exitcode != 0:
