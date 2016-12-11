@@ -40,7 +40,6 @@ def initlogger(config_basic):
     #logging.basicConfig(level = logging.WARNING)
     return logger
 
-
 #def killwait(interval, maxcnt) -> bool:
 #    """kill-wait loop until it die
 #delay 
@@ -56,7 +55,6 @@ maxwait = 20
 eachwait = 0.25
 
 class main_job:
-    
     def main_clean(self):
         pass
 
@@ -96,10 +94,12 @@ class main_job:
             try:
                 pid = os.fork()
                 assert pid >= 0
-            except:
+            except Exception as e:
                 logger.exception('failed to fork for work func')
+                raise e
             # the child process
             if pid == 0:
+                logger = logging.getLogger(logger.name + '.' + cnt)
                 logger.info('forked for work func')
                 handler_run(nodeconfig, logger, cnt)
                 logger.warning('work func return')
