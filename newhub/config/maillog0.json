@@ -2,8 +2,8 @@
 "basic":
 {
     "nodetype":"maillog",
-    "start_delay":10800,
-    "restart_delay":3600,
+    "start_delay":3600,
+    "restart_delay":99999,
     "repeat_time":1,
 
     "name":"maillog0",
@@ -30,7 +30,7 @@
 	"from_addr":"one_mail_addr@163.com",
 	"to_addrs":["one_mail_addr@163.com"]
     },
-    "time_delete":11101,
+    "time_delete":3901,
     "ifsend":true,
     "logspath":["/var/log/project_sperm/"],
     "send_interval":217
