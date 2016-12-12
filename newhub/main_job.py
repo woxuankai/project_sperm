@@ -99,7 +99,7 @@ class main_job:
                 raise e
             # the child process
             if pid == 0:
-                logger = logging.getLogger(logger.name + '.' + cnt)
+                logger = logging.getLogger(logger.name + '.' + hex(cnt))
                 logger.info('forked for work func')
                 handler_run(nodeconfig, logger, cnt)
                 logger.warning('work func return')
