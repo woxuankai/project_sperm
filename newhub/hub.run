@@ -42,7 +42,10 @@ do
     ${WORKDIR}/run.py ${WORKDIR}'/config/'${ONECONFIGFILE} start
 done
 
-sleep 24h
+#sleep 22h 55m
+ENDTIME=`date -d 'TZ="Asia/Shanghai" 7:30 tomorrow' +%s`
+STARTTIME=`date +%s`
+sleep $(( $ENDTIME - $STARTTIME ))
 
 for ONECONFIGFILE in  {maillog0,cam0,scales1}.json
 do
