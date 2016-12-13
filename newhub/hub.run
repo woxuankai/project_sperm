@@ -1,6 +1,7 @@
 #!/bin/bash
 
-NOWDATE=`date +%Y-%m-%d-%H-%M-%S`
+NOWDATE=`date +%Y%m%d-%H%M%S`
+#NOWDATE=`date -Iseconds`
 LOGDIR="/var/log/project_sperm"
 #LOGFILE="${LOGPATH}/${NOWDATE}_log_run.log"
 
