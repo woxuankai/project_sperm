@@ -96,18 +96,15 @@ class main_job:
                     # don't care return value, if error happened, just raise it
                     handler_run(nodeconfig, logger, cnt)
                 except:
-                    logger.error('work function raised an exception')
+                    logger.exception('work function raised an exception')
                     exitcode = 1
                 logger.info('exit work process')
                 os._exit(exitcode)# ensure 1-2-4-8...will not happen
 
             # parent process
             #logger.info('#{}: sleep now'.format(cnt))
-            try:
-                time.sleep(restart_delay)
-            except:
-                logger.exception('failed to do restart delay')
-                break
+            time.sleep(restart_delay)
+            
             pidwait, status = os.waitpid(pid, os.WNOHANG)
             if pidwait != pid:
                 #child process still not finished???
@@ -135,7 +132,8 @@ class main_job:
         # end of while
         
         logger.info('exit daemon process now')
-        exit(0)
+        # this is a child process, thus just os._exit it
+        os._exit(0)
 
     def start(self):
         self.main_clean()
