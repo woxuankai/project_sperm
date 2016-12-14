@@ -62,29 +62,19 @@ class main_job:
     def main_do(self):
         config = self.config
         logger = self.logger
-        try:
-            start_delay   = config['basic']['start_delay']
-            repeat_time   = config['basic']['repeat_time']
-            restart_delay = config['basic']['restart_delay']
-            nodeconfig    = config['spec']
-        except:
-            logger.exception('failed to parse config')
-            sys.exit(1)
-        try:
-            mod = importlib.import_module(\
-                "mod_" + config['basic']['nodetype'])
-            handler_run = getattr(mod, "run")
-            handler_fix = getattr(mod, "fix")
-        except:
-            logger.exception('failed to load mod or func')
-            sys.exit(1)
+        start_delay   = config['basic']['start_delay']
+        repeat_time   = config['basic']['repeat_time']
+        restart_delay = config['basic']['restart_delay']
+        nodeconfig    = config['spec']
+        mod = importlib.import_module(\
+            "mod_" + config['basic']['nodetype'])
+        handler_run = getattr(mod, "run")
+        handler_fix = getattr(mod, "fix")
+    
         logger.info('ready to start')
         #   wait a moment
-        try:
-            time.sleep(start_delay)
-        except:
-            logger.exception('failed to do start delay')
-            sys.exit(1)
+        time.sleep(start_delay)
+        
         logger.info('now fork for work process')
         #   fork for work process
         cnt = 0
@@ -109,7 +99,7 @@ class main_job:
                     logger.error('work function raised an exception')
                     exitcode = 1
                 logger.info('exit work process')
-                sys._exit(exitcode)# ensure 1-2-4-8...will not happen
+                os._exit(exitcode)# ensure 1-2-4-8...will not happen
 
             # parent process
             #logger.info('#{}: sleep now'.format(cnt))

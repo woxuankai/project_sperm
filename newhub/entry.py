@@ -47,60 +47,53 @@ def entry(config,todo):
     logger = logging.getLogger(loggername)
     def entry_start(config):
         # parse config file
-        try:
-            config_daemon=config['daemon']
+        config_daemon=config['daemon']
             context = daemon.DaemonContext()
-            context.working_directory = \
-                config_daemon.get('working_directory','/')
-            context.umask = config_daemon.get('umask', 0o000)
-            #must specify one for sig_term
-            context.pidfile = _pidfile(config_daemon['pidfile'])
-            context.uid = config_daemon.get('uid', os.getuid())
-            context.gid = config_daemon.get('gid', os.getgid())
-            if 'stdin' in config_daemon:
-                f = open(config_daemon['stdin'],'r')
-                context.stdin = f
-            if 'stdout' in config_daemon:
-                f = open(config_daemon['stdout'],'a')
-                context.stdout = f
-            if 'stderr' in config_daemon:
-                if ('stdout' not in config_daemon) \
-                   or (config_daemon['stdout'] != config_daemon['stderr']):
-                    # in prevention of open the same file twice
-                    f = open(config_daemon['stderr'],'a')
-                context.stderr = f
-            #context.signal_map = {signal.SIGTERM : main_clean}
-            #use default map
-            #main_clean has to receive 'config', to be completed in ohter way
-        except Exception:
-            logger.exception('failed to set daemon context')
-            sys.exit(1)
+        context.working_directory = \
+            config_daemon.get('working_directory','/')
+        context.umask = config_daemon.get('umask', 0o000)
+        #must specify one for sig_term
+        context.pidfile = _pidfile(config_daemon['pidfile'])
+        context.uid = config_daemon.get('uid', os.getuid())
+        context.gid = config_daemon.get('gid', os.getgid())
+        if 'stdin' in config_daemon:
+            f = open(config_daemon['stdin'],'r')
+            context.stdin = f
+        if 'stdout' in config_daemon:
+            f = open(config_daemon['stdout'],'a')
+            context.stdout = f
+        if 'stderr' in config_daemon:
+            if ('stdout' not in config_daemon) \
+               or (config_daemon['stdout'] != config_daemon['stderr']):
+                # in prevention of open the same file twice
+                f = open(config_daemon['stderr'],'a')
+            context.stderr = f
+        #context.signal_map = {signal.SIGTERM : main_clean}
+        #use default map
+        #main_clean has to receive 'config', to be completed in ohter way
         logger.info('daemon context inited')
 
-        try:
-            pid = os.fork()
-            assert pid >= 0
-        except:
-            logger.exception('failed to fork')
-            sys.exit(1)
+        pid = os.fork()
+        assert pid >= 0
         if pid > 0:
             logger.info('forked, the child process is expected to daemonize')
-            #parent return
+            # parent return
             return
-        #child init and daemonize
+        # child init and daemonize
+        mypid = os.getpid()
         try:
             with context:
                 do_it = main_job(config)
                 with do_it:
                     pass
-        except Exception as e:
-            if (type(e) != SystemExit) or (e.code != 0):
-                logger.exception(\
-                    'something wrong with child or grandchild')
+        except:
+            if mypid == os.getpid():
+                logger.exception('something wrong with the daemon process')
             else:
-                logger.info('exited with 0')
-            return
-        sys.exit(1)
+                logger.exception('something wrong with work process \
+(and also a problem occurs in work process shouldn\'t be raised here)')
+        # anyway, the child process shouln't come here, so exit(1)
+        os._exit(1) # this is a child process, shouldn't return
 
             
     def entry_stop(config):
