@@ -99,11 +99,17 @@ class main_job:
                 raise e
             # the child process
             if pid == 0:
+                exitcode = 0
                 logger = logging.getLogger(logger.name + '.' + hex(cnt))
-                logger.info('forked for work func')
-                handler_run(nodeconfig, logger, cnt)
-                logger.warning('work func return')
-                sys.exit(0)# ensure 1-2-4-8...will not happen
+                logger.info('forked for work process')
+                try:
+                    # don't care return value, if error happened, just raise it
+                    handler_run(nodeconfig, logger, cnt)
+                except:
+                    logger.error('work function raised an exception')
+                    exitcode = 1
+                logger.info('exit work process')
+                sys._exit(exitcode)# ensure 1-2-4-8...will not happen
 
             # parent process
             #logger.info('#{}: sleep now'.format(cnt))

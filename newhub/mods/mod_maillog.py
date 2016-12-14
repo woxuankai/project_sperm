@@ -127,10 +127,7 @@ def run(config, logger, cnt):
         logger.info('deleted')
         time.sleep(send_interval)
     logger.info('gone throught all old log files')
-    
-    logger.info('daemon exit now')
-    exit(0)
-    return 0
+    return
 
 import os, os.path
 def fix(config, logger, exitcode):
