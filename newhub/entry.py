@@ -88,10 +88,11 @@ def entry(config,todo):
                     pass
         except:
             if mypid == os.getpid():
-                logger.exception('something wrong with the daemon process')
+                logger.exception('exception raised in the daemon process')
             else:
-                logger.exception('something wrong with work process \
-(and also a problem occurs in work process shouldn\'t be raised here)')
+                logger.exception('exception raised in the  work process \
+which indicates error in main_job.do_it(). \
+(and also a problem occurs in work func shouldn\'t be raised here)')
         # anyway, the child process shouln't come here, so exit(1)
         os._exit(1) # this is a child process, shouldn't return
 
