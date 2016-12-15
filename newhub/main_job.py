@@ -19,11 +19,14 @@ def initlogger(config_basic):
         'NOTSET'   : logging.NOTSET}
     defaultlogformat = \
         '%(asctime)s - %(levelname)s - %(name)s : %(message)s'
-    logging.info('...setting logger in main_job')
+    # considering it is already in a daemon process which stdin/out/err has
+    # been redirected, the info out put will be meaning less
+    # however, you can still redirect stderr to a file to record any error
+    # logging.info('...setting logger in main_job')
     logfilename = config_basic['filename'] # must specify one
     loglevel    = leveldict[config_basic.get('level','WARNING')]
     logformat    = config_basic.get('format',defaultlogformat)
-    logging.info("filename: {}, level: {}".format(logfilename,loglevel))
+    # logging.info("filename: {}, level: {}".format(logfilename,loglevel))
     name = config_basic.get('name','default')
     name = 'main_job.' + name
     logger = logging.getLogger(name)

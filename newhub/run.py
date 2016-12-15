@@ -12,6 +12,10 @@ mods_dir='./mods'
 
 if __name__ == '__main__':
     # slove path problems
+    # no need to redirect output to stdout instead stderr
+    # because stderr can also be redirected to a file
+    # logging.basicConfig(level=logging.DEBUG,\
+    #                     stream=logging.StreamHandler(sys.stdout))
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger('root')
     logger.info('#########################################')
