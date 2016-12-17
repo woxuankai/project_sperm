@@ -98,9 +98,18 @@ class main_job:
                 try:
                     # don't care return value, if error happened, just raise it
                     handler_run(nodeconfig, logger, cnt)
-                except:
-                    logger.exception('work function raised an exception')
-                    exitcode = 1
+                except SystemExit as e:
+                    # although invode sys.exit is not recommended, but still
+                    # ignore Exception raised by sys.exit(0)
+                    logger.info('invoked sys.exit or just exit is \
+not recommeneded in fun run')
+                    if e.code!=0:
+                        logger.exception('work fun exit {}'.format(e.code))
+                        exitcode = e.code
+                    else:
+                        pass # invoked exit(0), which mean ok
+                except:#except other error
+                    logger.exception('a no-exit raise in work fun')
                 logger.info('exit work process')
                 os._exit(exitcode)# ensure 1-2-4-8...will not happen
 
